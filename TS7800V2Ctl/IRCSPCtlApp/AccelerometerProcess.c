@@ -4,13 +4,29 @@
 #include <stdint.h>
 #include <linux/types.h>
 #include <sys/ioctl.h>
-#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define ACCELEROMETER_CHIP_ADDRESS 0x1c
 
 static int accelerometer_init(void);
 static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes);
 static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, int bytes);
+//defined fuct
+static void accelerometer_reset(int twifd) {
+	accelerometer_write(twifd, (unsigned char) 0b01000000, 0x2B, 1); //set reset int cntl reg 2
+	usleep(100000);
+	accelerometer_write(fd, 0b1 , 0x2A, 1); //set active in ctrl reg 2
+}
+
+static void getAcceration(int twifd, unit16_t* measurementArray) {//TODO: check Autoincrement address behavior 
+	unsigned char data[6];
+	accelerometer_read(fd, data, 1, sizeof(data)); //read registers 1-7
+	for (int i = 0; i < 3; i++) {
+		measurementArray[i] = data[2*i] << 6 + data[2*i + 1] >> 2; //shifts MSB and LSB into correct digits
+	}
+
+}
 
 static int accelerometer_init(void)
 {
@@ -28,7 +44,7 @@ static int accelerometer_init(void)
 
 
 
-static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes) //two wire interface fd, command, 
+static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes) 
 {
 	struct i2c_rdwr_ioctl_data packets;
 	struct i2c_msg msgs[2];
@@ -54,7 +70,7 @@ static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes
 	return 0;
 }
 
-static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, int bytes)
+static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, int bytes) //two wire interface file descriptor, array of commands, command register, number of commands
 {
 	struct i2c_rdwr_ioctl_data packets;
 	struct i2c_msg msg;

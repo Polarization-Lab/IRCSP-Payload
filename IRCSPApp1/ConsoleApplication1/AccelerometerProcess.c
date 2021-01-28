@@ -16,31 +16,31 @@ static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, int byte
 static void accelerometer_reset(int twifd) {
 	accelerometer_write(twifd, (unsigned char) 0b01000000, 0x2B, 1); //set reset int cntl reg 2
 	usleep(100000);
-	accelerometer_write(fd, 0b1 , 0x2A, 1); //set active in ctrl reg 
+	accelerometer_write(twifd, 0b1 , 0x2A, 1); //set active in ctrl reg 
 }
 
 static int accelerometerSetFastRead(int twifd) {
-	accelerometer_write(fd, 0b11, 0x2A, 1); //fast active
+	accelerometer_write(twifd, 0b11, 0x2A, 1); //fast active
 }
 
 static int accelerometerSetNormalRead(int twifd) {
-	accelerometer_write(fd, 0b10, 0x2A, 1); //fast active
+	accelerometer_write(twifd, 0b10, 0x2A, 1); //fast active
 }
 
 
 //check f_read mode before using
-static void getAcceration(int twifd, unit16_t* measurementArray) {
+static void getAcceration(int twifd, uint16_t* measurementArray) {
 	unsigned char data[6];
-	accelerometer_read(fd, data, 0x01, sizeof(data)); //read registers 1-7
+	accelerometer_read(twifd, data, 0x01, sizeof(data)); //read registers 1-7
 	for (int i = 0; i < 3; i++) {
 		measurementArray[i] = data[2*i] << 6 + data[2*i + 1] >> 2; //shifts MSB and LSB into correct digits
 	}
 }
 
 //check f_read mode before using
-static void getFastAcceration(int twifd, unit16_t* measurementArray) {//8 MSB needs Autoincrement to be fast mode
+static void getFastAcceration(int twifd, uint16_t* measurementArray) {//8 MSB needs Autoincrement to be fast mode
 	unsigned char data[3];
-	accelerometer_read(fd, data, 0x01, size of data);
+	accelerometer_read(twifd, data, 0x01, sizeof(data));
 	for (int i = 0; i < 3; i++) {
 		measurementArray[i] = data[i]; 
 	}

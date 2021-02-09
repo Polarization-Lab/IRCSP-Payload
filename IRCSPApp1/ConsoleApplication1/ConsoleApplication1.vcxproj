@@ -60,6 +60,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WSL_1_0</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -75,12 +76,15 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\Thor Neill\source\repos\IRSCP-Payload\IRCSPApp1\ts7800v2-utils-master;</IncludePath>
+  </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="AccelerometerProcess.c" />
-    <ClCompile Include="main.c" />
+    <ClInclude Include="AccelerometerProcess.h" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\ts7800v2-utils-master\i2c-dev.h" />
+    <ClInclude Include="i2c-dev.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,0 +1,1 @@
+g++ -o "/mnt/c/Users/Thor Neill/source/repos/IRSCP-Payload/IRCSPApp1/ConsoleApplication1/bin/x64/Debug/IRCSPApp1.out" -Wl,--no-undefined -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack "/mnt/c/Users/Thor Neill/source/repos/IRSCP-Payload/IRCSPApp1/ConsoleApplication1/obj/x64/Debug/main.o"

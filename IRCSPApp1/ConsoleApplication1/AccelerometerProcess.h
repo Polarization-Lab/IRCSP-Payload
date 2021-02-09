@@ -1,30 +1,37 @@
-#include "../ts7800v2-utils-master/i2c-dev.h"
+#ifndef ACCELEROMETERPROCESS_H
+#define	ACCELEROMETERPROCESS_H
+#include "i2c-dev.h"
 #include <linux/pci.h>
 #include <fcntl.h>
 #include <stdint.h>
 #include <linux/types.h>
 #include <sys/ioctl.h>
-#include <stdio.h>
 #include <stdlib.h>
-
+#include <unistd.h>
+#include <string.h>
+#include <cstddef>
+#include <cstdio>
 #define ACCELEROMETER_CHIP_ADDRESS 0x1c
 
 static int accelerometer_init(void);
-static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes);
-static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, int bytes);
+static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes);
+static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, short int bytes);
 //defined fuct
 static void accelerometer_reset(int twifd) {
-	accelerometer_write(twifd, (unsigned char) 0b01000000, 0x2B, 1); //set reset int cntl reg 2
+	unsigned char command;
+	accelerometer_write(twifd, &(command = 0b01000000), 0x2B, 1); //set reset int cntl reg 2
 	usleep(100000);
-	accelerometer_write(twifd, 0b1 , 0x2A, 1); //set active in ctrl reg 
+	accelerometer_write(twifd, &(command = 0b1), 0x2A, 1); //set active in ctrl reg 
 }
 
-static int accelerometerSetFastRead(int twifd) {
-	accelerometer_write(twifd, 0b11, 0x2A, 1); //fast active
+static void accelerometerSetFastRead(int twifd) {
+	unsigned char command;
+	accelerometer_write(twifd, &(command = 0b11), 0x2A, 1); //fast active
 }
 
-static int accelerometerSetNormalRead(int twifd) {
-	accelerometer_write(twifd, 0b10, 0x2A, 1); //fast active
+static void accelerometerSetNormalRead(int twifd) {
+	unsigned char command;
+	accelerometer_write(twifd, &(command = 0b10), 0x2A, 1); //fast active
 }
 
 
@@ -33,7 +40,7 @@ static void getAcceration(int twifd, uint16_t* measurementArray) {
 	unsigned char data[6];
 	accelerometer_read(twifd, data, 0x01, sizeof(data)); //read registers 1-7
 	for (int i = 0; i < 3; i++) {
-		measurementArray[i] = data[2*i] << 6 + data[2*i + 1] >> 2; //shifts MSB and LSB into correct digits
+		measurementArray[i] = (data[2*i] << 6) + (data[2*i + 1] >> 2); //shifts MSB and LSB into correct digits
 	}
 }
 
@@ -62,7 +69,7 @@ static int accelerometer_init(void)
 
 
 
-static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes) 
+static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes) 
 {
 	struct i2c_rdwr_ioctl_data packets;
 	struct i2c_msg msgs[2];
@@ -70,12 +77,12 @@ static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes
 	msgs[0].addr = ACCELEROMETER_CHIP_ADDRESS;
 	msgs[0].flags = 0;
 	msgs[0].len = 1;
-	msgs[0].buf = (void*)&addr;
+	msgs[0].buf = (char*)&addr;
 
 	msgs[1].addr = ACCELEROMETER_CHIP_ADDRESS;
 	msgs[1].flags = I2C_M_RD;
 	msgs[1].len = bytes;
-	msgs[1].buf = (void*)data;
+	msgs[1].buf = (char*)data;
 
 	packets.msgs = msgs;
 	packets.nmsgs = 2;
@@ -88,7 +95,7 @@ static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, int bytes
 	return 0;
 }
 
-static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, int bytes) //two wire interface file descriptor, array of commands, command register, number of commands
+static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, short int bytes) //two wire interface file descriptor, array of commands, command register, number of commands
 {
 	struct i2c_rdwr_ioctl_data packets;
 	struct i2c_msg msg;
@@ -110,3 +117,5 @@ static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, int byte
 	}
 	return 0;
 }
+
+#endif

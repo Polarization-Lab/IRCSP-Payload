@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|ARM">
@@ -80,8 +80,12 @@
     <IncludePath>C:\Users\Thor Neill\source\repos\IRSCP-Payload\IRCSPApp1\ts7800v2-utils-master;</IncludePath>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="TECTTL.cpp" />
+    <ClCompile Include="UARTserial.c" />
     <ClInclude Include="AccelerometerProcess.h" />
     <ClCompile Include="main.cpp" />
+    <ClInclude Include="TECTTL.h" />
+    <ClInclude Include="UARTserial.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="i2c-dev.h" />

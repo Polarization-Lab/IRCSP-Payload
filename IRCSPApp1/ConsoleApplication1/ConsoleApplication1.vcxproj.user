@@ -4,6 +4,9 @@
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <RemoteTarget>-2033739626;localhost (username=, port=22, authentication=Password)</RemoteTarget>
+    <RemoteTarget>570725058;192.168.0.50 (username=, port=22, authentication=Password)</RemoteTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <RemoteTarget>570725058;192.168.0.50 (username=, port=22, authentication=Password)</RemoteTarget>
   </PropertyGroup>
 </Project>

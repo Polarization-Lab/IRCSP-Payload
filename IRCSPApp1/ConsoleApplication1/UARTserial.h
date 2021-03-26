@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 int initTTLDIO() {
-	int fd = open("/dev/ttts6", O_RDWR);
+	int fd = open("/dev/ttts6", O_RDWR);//linux header that handles chosen DIO pins
 	if (fd = -1) perror("unable to open ttts6");
 	else return fd;
 }

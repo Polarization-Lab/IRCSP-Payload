@@ -25,7 +25,10 @@ public:
 	TECTTL(int, float, float , float , float, float, float);
 
 	void sendParams();
-	void recieveParams(float[]);
+	void getPrintOut(char*);
+	void singleByteCommand(char);
+	void setParams(float, float, float, float, float, float);
+	void setParams(float, float, float, float);
 private:
 
 };
@@ -40,6 +43,7 @@ TECTTL::TECTTL(int filedescriptor, float setpoint, float P, float I, float D)
 	differential = std::min(std::max(D, (float)COEFFICIENT_MIN), (float)COEFFICIENT_MAX);
 	min = -70; 
 	max = 70;
+	this->sendParams();
 }
 
 TECTTL::TECTTL(int filedescriptor, float setpoint, float P, float I, float D, float minTemp, float maxTemp)
@@ -52,12 +56,10 @@ TECTTL::TECTTL(int filedescriptor, float setpoint, float P, float I, float D, fl
 	differential = std::min(std::max(D, (float)COEFFICIENT_MIN), (float)COEFFICIENT_MAX);
 	min = minTemp;
 	max = maxTemp;
+	this->sendParams();
 }
 
 
-TECTTL::~TECTTL()
-{
-}
 
 
 #endif // !TECTTL_H

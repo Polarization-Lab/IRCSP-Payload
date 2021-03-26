@@ -69,7 +69,7 @@ static int accelerometer_init(void)
 
 
 
-static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes) 
+static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes) //raw bits needs to be converted to Gs
 {
 	struct i2c_rdwr_ioctl_data packets;
 	struct i2c_msg msgs[2];

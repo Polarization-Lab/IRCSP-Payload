@@ -11,49 +11,73 @@
 #include <string.h>
 #include <cstddef>
 #include <cstdio>
+#include <cmath>
 #define ACCELEROMETER_CHIP_ADDRESS 0x1c
+#define DEBOUNCE_COUNT 0b00001111
 
-static int accelerometer_init(void);
-static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes);
-static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, short int bytes);
-//defined fuct
-static void accelerometer_reset(int twifd) {
-	unsigned char command;
-	accelerometer_write(twifd, &(command = 0b01000000), 0x2B, 1); //set reset int cntl reg 2
-	usleep(100000);
-	accelerometer_write(twifd, &(command = 0b1), 0x2A, 1); //set active in ctrl reg 
+class Accelerometer
+{
+public:
+	int twifd; //points to i2c-dev file
+	signed short measurementArray[3]; //records x,y,z
+	bool fRead = false; //fast read mode
+	int fullscale = 2; //g range
+	float gValues[3];
+	
+
+	Accelerometer(); //creates new object
+	Accelerometer(int twifd);
+	~Accelerometer(); //destorys object
+	
+	static int accelerometer_init(void); //gets I2C file descriptor, establishes comms with accelerometer
+	static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes);
+	static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, short int bytes);
+	static int accelerometer_write(int twifd, uint8_t data, uint16_t addr);
+	
+	void setFF_MTN_THS_CFG(uint8_t data, uint8_t axis, bool OAE); //use binary input to set accelerometer threshold for motion detect & for freefall mode 
+	void setMotionFreefallInterupt(float g, uint8_t axis, bool MotionDetection); //use g value to set accelerometer threshold
+	void setDebounceCount(uint8_t count);
+	bool checkMotionInteruptFlag(uint8_t* flags); //gets the FF_MT_SRC freefall/motion source register returns true if EA is raised
+
+	void setTransientInterupt(uint8_t data, uint8_t axis); //use raw //define
+	void setTransientInterupt(float g, uint8_t axis); //use gs //define
+	bool checkTransientInteruptFlag(); //define
+	
+	void accelerometer_reset();
+	void setFastRead();
+	void setNormalRead();
+	void getAcceleration(); //gets converted acceleration into gValues
+	void getRawAcceleration(); //consider moving to private
+	void getFastRawAcceleration(); //consider moving to private
+	
+	//void sleepAccelerometer(int hr, int min, int sec); //no
+private:
+	bool OAE = 0; //Freefall/motion dection configuration
+	uint8_t FF_MT_threshold = 0b0;
+	uint8_t xyzEFE = 0b001;
+	uint8_t interupt;
+};
+
+Accelerometer::Accelerometer()
+{
+	twifd = accelerometer_init();
+	accelerometer_reset();
+	setDebounceCount((uint8_t)DEBOUNCE_COUNT);
 }
 
-static void accelerometerSetFastRead(int twifd) {
-	unsigned char command;
-	accelerometer_write(twifd, &(command = 0b11), 0x2A, 1); //fast active
+Accelerometer::Accelerometer(int twifd) {
+	this->twifd = twifd;
+	accelerometer_reset();
+	setDebounceCount((uint8_t)DEBOUNCE_COUNT);
 }
 
-static void accelerometerSetNormalRead(int twifd) {
-	unsigned char command;
-	accelerometer_write(twifd, &(command = 0b10), 0x2A, 1); //fast active
+Accelerometer::~Accelerometer()
+{
+	close(twifd);
 }
 
 
-//check f_read mode before using
-static void getAcceration(int twifd, uint16_t* measurementArray) {
-	unsigned char data[6];
-	accelerometer_read(twifd, data, 0x01, sizeof(data)); //read registers 1-7
-	for (int i = 0; i < 3; i++) {
-		measurementArray[i] = (data[2*i] << 6) + (data[2*i + 1] >> 2); //shifts MSB and LSB into correct digits
-	}
-}
-
-//check f_read mode before using
-static void getFastAcceration(int twifd, uint16_t* measurementArray) {//8 MSB needs Autoincrement to be fast mode
-	unsigned char data[3];
-	accelerometer_read(twifd, data, 0x01, sizeof(data));
-	for (int i = 0; i < 3; i++) {
-		measurementArray[i] = data[i]; 
-	}
-}
-
-static int accelerometer_init(void)
+int Accelerometer::accelerometer_init(void)
 {
 	static int fd = -1;
 	fd = open("/dev/i2c-0", O_RDWR);
@@ -67,9 +91,7 @@ static int accelerometer_init(void)
 	return fd;
 }
 
-
-
-static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes) //raw bits needs to be converted to Gs
+int Accelerometer::accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int bytes) //raw bits needs to be converted to Gs
 {
 	struct i2c_rdwr_ioctl_data packets;
 	struct i2c_msg msgs[2];
@@ -95,7 +117,7 @@ static int accelerometer_read(int twifd, uint8_t* data, uint16_t addr, short int
 	return 0;
 }
 
-static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, short int bytes) //two wire interface file descriptor, array of commands, command register, number of commands
+int Accelerometer::accelerometer_write(int twifd, uint8_t* data, uint16_t addr, short int bytes) //two wire interface file descriptor, array of commands, command register, number of commands
 {
 	struct i2c_rdwr_ioctl_data packets;
 	struct i2c_msg msg;
@@ -116,6 +138,116 @@ static int accelerometer_write(int twifd, uint8_t* data, uint16_t addr, short in
 		return 1;
 	}
 	return 0;
+}
+
+int Accelerometer::accelerometer_write(int twifd, uint8_t data, uint16_t addr) {
+	struct i2c_rdwr_ioctl_data packets;
+	struct i2c_msg msg;
+	uint8_t outdata[2];
+
+	outdata[0] = addr;
+	outdata[1] = data;
+
+	msg.addr = ACCELEROMETER_CHIP_ADDRESS;
+	msg.flags = 0;
+	msg.len = 1 + 1;
+	msg.buf = (char*)outdata;
+
+	packets.msgs = &msg;
+	packets.nmsgs = 1;
+
+	if (ioctl(twifd, I2C_RDWR, &packets) < 0) {
+		return 1;
+	}
+	return 0;
+}
+
+void Accelerometer::setFF_MTN_THS_CFG(uint8_t data, uint8_t axis, bool _OAE)
+{
+	FF_MT_threshold = data;
+	xyzEFE = axis & 0b111;
+	OAE = _OAE;
+	accelerometer_write(twifd, (uint8_t)(0b10000000 | (OAE << 6) | (xyzEFE) << 3), 0x15);
+
+	FF_MT_threshold &= ~(0b10000000); //set debounce counter mode to 0, set to 0 on no-detect
+	accelerometer_write(twifd, FF_MT_threshold, 0x17); //set threshold register
+	accelerometer_read(twifd, &interupt, 0x16, 1); //clears the 0x16: FF_MT_SRC freefall/motion source register
+}
+
+void Accelerometer::setMotionFreefallInterupt(float g, uint8_t axis, bool MotionDetection) {
+	uint8_t bits = (uint8_t) floor(g / .063);
+	setFF_MTN_THS_CFG(bits, axis, MotionDetection);
+}
+
+void Accelerometer::setDebounceCount(uint8_t count) {
+	accelerometer_write(twifd, count, 0x18);
+}
+
+bool Accelerometer::checkMotionInteruptFlag(uint8_t* flags) {
+	uint8_t* temp = new uint8_t;
+	accelerometer_read(twifd, temp, 0x16, 1);
+	if (flags != NULL)
+		*flags = *temp;
+	return (*temp)&0b10000000;
+}
+
+void Accelerometer::setTransientInterupt(uint8_t data, uint8_t axis) {
+	axis &= 0b111;
+	accelerometer_write(twifd, (uint8_t)((1 << 4) | (axis << 1)), 0x1D);
+	data &= ~(0b10000000);
+	accelerometer_write(twifd, data, 0x1F);
+	accelerometer_write(twifd, (uint8_t)DEBOUNCE_COUNT, 0x20);
+}
+
+void Accelerometer::setTransientInterupt(float g, uint8_t axis) {
+	setTransientInterupt((uint8_t)floor(g / .063), axis);
+}
+
+void Accelerometer::accelerometer_reset() {
+	unsigned char command;
+	accelerometer_write(twifd, &(command = 0b01000000), 0x2B, 1); //set reset int cntl reg 2
+	usleep(100000);
+	accelerometer_write(twifd, &(command = 0b1), 0x2A, 1); //set active in ctrl reg 
+}
+
+void Accelerometer::setFastRead() {
+	accelerometer_write(twifd, 0b11, 0x2A); //fast active
+}
+
+void Accelerometer::setNormalRead() {
+	accelerometer_write(twifd, 0b10, 0x2A); //normal active
+}
+
+//check f_read mode before using
+void Accelerometer::getRawAcceleration() {
+	unsigned char data[6];
+	accelerometer_read(twifd, data, 0x01, sizeof(data)); //read registers 1-7
+	for (int i = 0; i < 3; i++) {
+		measurementArray[i] = (signed short)((data[2 * i] << 8) + (data[2 * i + 1])); //shifts MSB and LSB into correct digits, Value = FullScale Range/2^13
+	}
+}
+
+//check f_read mode before using
+void Accelerometer::getFastRawAcceleration() {//8 MSB needs Autoincrement to be fast mode
+	unsigned char data[3];
+	accelerometer_read(twifd, data, 0x01, sizeof(data));
+	for (int i = 0; i < 3; i++) {
+		measurementArray[i] = (signed short)(data[i] << 8); //value = FullScale Range/2^7 
+	}
+}
+
+void Accelerometer::getAcceleration() {
+	if (fRead) {
+		getFastRawAcceleration();
+	}
+	else
+	{
+		getRawAcceleration();
+	}
+	for (int i = 0; i < 3; i++) {
+		gValues[i] = measurementArray[i] * fullscale / pow(2, 15);
+	}
+
 }
 
 #endif

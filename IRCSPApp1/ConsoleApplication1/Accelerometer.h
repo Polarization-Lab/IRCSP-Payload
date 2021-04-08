@@ -1,5 +1,5 @@
-#ifndef ACCELEROMETERPROCESS_H
-#define	ACCELEROMETERPROCESS_H
+#ifndef ACCELEROMETER_H
+#define	ACCELEROMETER_H
 #include "i2c-dev.h"
 #include <linux/pci.h>
 #include <fcntl.h>
@@ -44,6 +44,8 @@ public:
 	bool checkTransientInteruptFlag(); //define
 	
 	void accelerometer_reset();
+	void setStandby();
+	void setActive();
 	void setFastRead();
 	void setNormalRead();
 	void getAcceleration(); //gets converted acceleration into gValues
@@ -54,7 +56,7 @@ public:
 private:
 	bool OAE = 0; //Freefall/motion dection configuration
 	uint8_t FF_MT_threshold = 0b0;
-	uint8_t xyzEFE = 0b001;
+	uint8_t zyxEFE = 0b100;
 	uint8_t interupt;
 };
 
@@ -162,21 +164,25 @@ int Accelerometer::accelerometer_write(int twifd, uint8_t data, uint16_t addr) {
 	return 0;
 }
 
-void Accelerometer::setFF_MTN_THS_CFG(uint8_t data, uint8_t axis, bool _OAE)
+void Accelerometer::setFF_MTN_THS_CFG(uint8_t threshold, uint8_t axis, bool _OAE)
 {
-	FF_MT_threshold = data;
-	xyzEFE = axis & 0b111;
+	FF_MT_threshold = threshold;
+	zyxEFE = axis & 0b111;
 	OAE = _OAE;
-	accelerometer_write(twifd, (uint8_t)(0b10000000 | (OAE << 6) | (xyzEFE) << 3), 0x15);
-
-	FF_MT_threshold &= ~(0b10000000); //set debounce counter mode to 0, set to 0 on no-detect
-	accelerometer_write(twifd, FF_MT_threshold, 0x17); //set threshold register
+	uint8_t CFG[4];
+	CFG[0] = (uint8_t)((1 << 7) | (OAE << 6) | (zyxEFE) << 3);
+	CFG[1] = 0;
+	CFG[2] = FF_MT_threshold & ~(0b10000000); //set threshold register
+	CFG[3] = DEBOUNCE_COUNT & 0xFF; //set debounce counter mode to 0, set to decrement on no-detect
+	setStandby();
+	accelerometer_write(twifd, CFG, 0x15, 4); //0x15 can only be edited in stby mode
+	setActive();
 	accelerometer_read(twifd, &interupt, 0x16, 1); //clears the 0x16: FF_MT_SRC freefall/motion source register
 }
 
-void Accelerometer::setMotionFreefallInterupt(float g, uint8_t axis, bool MotionDetection) {
+void Accelerometer::setMotionFreefallInterupt(float g, uint8_t axisZYX, bool MotionDetection) {
 	uint8_t bits = (uint8_t) floor(g / .063);
-	setFF_MTN_THS_CFG(bits, axis, MotionDetection);
+	setFF_MTN_THS_CFG(bits, axisZYX, MotionDetection);
 }
 
 void Accelerometer::setDebounceCount(uint8_t count) {
@@ -184,11 +190,10 @@ void Accelerometer::setDebounceCount(uint8_t count) {
 }
 
 bool Accelerometer::checkMotionInteruptFlag(uint8_t* flags) {
-	uint8_t* temp = new uint8_t;
-	accelerometer_read(twifd, temp, 0x16, 1);
+	accelerometer_read(twifd, &interupt, 0x16, 1);
 	if (flags != NULL)
-		*flags = *temp;
-	return (*temp)&0b10000000;
+		*flags = interupt;
+	return (interupt)&0b10000000;
 }
 
 void Accelerometer::setTransientInterupt(uint8_t data, uint8_t axis) {
@@ -204,10 +209,25 @@ void Accelerometer::setTransientInterupt(float g, uint8_t axis) {
 }
 
 void Accelerometer::accelerometer_reset() {
-	unsigned char command;
-	accelerometer_write(twifd, &(command = 0b01000000), 0x2B, 1); //set reset int cntl reg 2
+	uint8_t command;
+	accelerometer_read(twifd, &command, 0X2A, 1);
+	accelerometer_write(twifd, &(command |= 0b01000000), 0x2B, 1); //set reset int cntl reg 2
 	usleep(100000);
-	accelerometer_write(twifd, &(command = 0b1), 0x2A, 1); //set active in ctrl reg 
+	accelerometer_write(twifd, &(command |= 0b1), 0x2A, 1); //set active in ctrl reg 
+}
+
+void Accelerometer::setStandby() {
+	uint8_t CTRL_REG1;
+	accelerometer_read(twifd, &CTRL_REG1, 0X2A, 1);
+	CTRL_REG1 &= ~1;
+	accelerometer_write(twifd, CTRL_REG1, 0X2A);
+}
+
+void Accelerometer::setActive() {
+	uint8_t CTRL_REG1;
+	accelerometer_read(twifd, &CTRL_REG1, 0X2A, 1);
+	CTRL_REG1 |= 1;
+	accelerometer_write(twifd, CTRL_REG1, 0X2A);
 }
 
 void Accelerometer::setFastRead() {

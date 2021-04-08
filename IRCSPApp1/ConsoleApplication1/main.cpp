@@ -1,51 +1,39 @@
 #include <cstdio>
 #include <cmath>
 #include "TECTTL.h"
-#include "AccelerometerProcess.h"
-#include "ADCProcess.h"
-#include "BalloonProcess.h"
+#include "Accelerometer.h"
+#include "ADC.h"
+#include "Balloon.h"
 #include <time.h>
 #include <sys/mman.h>
 #include <linux/pci.h>
 #include <unistd.h>
-#include <pwd.h>
-#define MIN_ASCENT_RATE 100
+#include <termios.h>
+#define MIN_ASCENT_RATE 60/60 //60 m/60 sec == 200ft / 60sec
 #define DEBUG
 
+#ifdef DEBUG
+#include <pwd.h>
+#endif // DEBUG
 
 
 typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, falling } SBCstate; //SBC states
 
 static __off_t get_fpga_phy(void);
 
-void test() {
-    //currently used as testbed
-    true;
-    //int* FPGAsyscon = (int*) 0xFC081000;
-    //*(FPGAsyscon + 0x0c) &= ~(1 << 20);
-    printf("hello from %s!\n", "ConsoleApplication1");
-    int AccelFD = Accelerometer::accelerometer_init();
-    //accelerometer_reset(AccelFD);
-    //accelerometerSetNormalRead(AccelFD);
-    uint16_t data[3];
-    //getAcceration(AccelFD, data);
-    printf("x = %d, y = %d, z =%d\n", data[0], data[1], data[2]);
-    //*(FPGAsyscon + 0x0c) &= ~(1 < 20);
-    return;
-}
-
 int main()
 {   
-    time_t bootTime, currentTime;
-    SBCstate sbcState = boot;
+    time_t bootTime = time(NULL), currentTime; // stores epoch time; 
+    volatile SBCstate sbcState = boot;
     Accelerometer* accel;
     ADC* adc;
     TECTTL* tec;
     Balloon* balloon;
-    float alitudeRate;
     bool motionInterupt;
-    char testChar[256], testMsg[256];
+    char testChar[256] = "empty", testMsg[256];
     
+    uint8_t settings[4];
+
     int devmem = open("/dev/mem", O_RDWR | O_SYNC);
     if (devmem < 0) {
         fprintf(stderr, "Error:  Can't open /dev/mem\n");
@@ -71,79 +59,92 @@ int main()
     //int fdttyS1 = open("/dev/ttyS1", O_RDWR | O_SYNC);
     ////unsigned char* conttyS1 = (unsigned char*)mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, fdttyS1, 0);
 
-    //int fdttyS7 = open("/dev/ttyS7", O_RDWR | O_SYNC);
+    int fdttyS7 = open("/dev/ttyS7", O_RDWR | O_NONBLOCK | O_NOCTTY); //com3 rs232
+    struct termios ttyS7;
+    tcgetattr(fdttyS7, &ttyS7);
+    cfmakeraw(&ttyS7);
+    ttyS7.c_cflag &= ~(PARENB | CSTOPB);
+    ttyS7.c_lflag |= ICANON;
+    tcsetattr(fdttyS7, TCSANOW, &ttyS7);
 
-    ////unsigned int* syscon2 = (unsigned int*)mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, devmem, 0xE80000C0);
+    int fdttyS9 = open("/dev/ttyS9", O_RDWR | O_NONBLOCK | O_NOCTTY); //extra lcd ttl
+    struct termios ttyS9;
+    tcgetattr(fdttyS9, &ttyS9);
+    cfmakeraw(&ttyS9);
+    ttyS9.c_cflag &= ~(PARENB | CSTOPB);
+    ttyS9.c_lflag &= ~ICANON;
+    tcsetattr(fdttyS9, TCSANOW, &ttyS9);
 
-    //syscon[0xc / 4] |= (1 << 16);
-    //syscon[0xC4 / 4] |= (1 << 4);
-    //syscon[0xD4 / 4] |= (1 << 4);
-
-    //int status = syscon[0xC4 / 4];
-    //fprintf(stderr, "%d\n", status);
-    //strcpy(testChar, "Can you hear me?");
-    //write(fdttyS7, testChar, strlen(testChar)+1);
-    //status = syscon[0xC4 / 4];
-    //fprintf(stderr, "%d\n", status);
-    //usleep(1000);
-    //read(fdttyS1, testChar, 25);
-    //fprintf(stderr, testChar);
-
-    //fprintf(stderr, "new test");
+    fprintf(stderr, "new test\n");
 #endif // DEBUG
 
-   
+    int n = 10;
     
-
     while (1) {//automata loop
         switch (sbcState) //state handler
         {
         case boot:
             accel = new Accelerometer();
             adc = new ADC(accel->twifd);
-
-            //set /dev/ttts6 to auto TxEN
-            syscon[0x4 / 4] &= ~(1 << (11 - 1)); //set DIO pin 11 to idle
-            syscon[0x8 / 4] &= ~(1 << (11 - 1)); //set DIO pin 11 to out
-
-
-            tec = new TECTTL();
-//            tec->clearBuffer();
-            tec->getPrintOut(testChar);
             balloon = new Balloon();
+            tec = new TECTTL();
+
+            usleep(100); //sleep to let messages pass 
+            n = read(fdttyS9, testChar,25);
+            n = write(fdttyS9, testChar, n);
+            usleep(100);
+            tec->getPrintOut(testChar);
 
             accel->setMotionFreefallInterupt((float)1.25,0b100,true);
+#ifdef DEBUG
+            Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
+#endif // DEBUG
+
             accel->getAcceleration();
 
             tec->setParams(30, 1, 1, 1);
+            usleep(100);
+            n = read(fdttyS9, testChar, 100);
+            n = write(fdttyS9, testChar, n);
+            usleep(100);
             tec->getPrintOut(testChar);
 
             adc->ADC_init();
             adc->getADC();
 
-            bootTime = time(0); //this should be GMT/UTC, double check
             if (true && bootTime != .1)//boot check
                 sbcState = preflight;
             break;
         case preflight:
-            if(true)//time since last check > 1min
-               motionInterupt = accel->checkMotionInteruptFlag(NULL);
-            currentTime = time(0);
+            if (true)//time since last check > 1min
+            {
+                motionInterupt = accel->checkMotionInteruptFlag(NULL);
+#ifdef DEBUG
+                accel->getAcceleration();
+#endif // DEBUG
+            }
 
             syscon[(0xc / 4)] &= ~(1 << 20); //turn red led off
             syscon[(0xc / 4)] |= (1 << 20); //turn red led on
 
-            strcpy(testMsg,"HelloBalloon\n\rNextMessagge\n\rcutoffMe");
-            write(balloon->fdRS232, testMsg, sizeof(testMsg));
-            strcpy(testMsg, "Message\n\rRandomNoise");
-            write(balloon->fdRS232, testMsg, sizeof(testMsg));
+            strcpy(testMsg,"$GPGGA,233656.000,3146.75029,N,09542.98104,W,1,12,0.8,138.42,M,-24.0,M,,*52\r\n");
+            write(fdttyS7, testMsg, strlen(testMsg)); //note doesnt send '\0'
+            usleep(100);
+            balloon->readBuf();
+            strcpy(testMsg, "$GPGGA,233707.000,3146.75029,N,09542.98104,W,1,13,0.8,238.42,M,-24.0,M,,*56\r\n");
+            write(fdttyS7, testMsg, strlen(testMsg));
+            usleep(100);
             balloon->readBuf();
 
             tec->sendParams();
+            usleep(100);
+            n = read(fdttyS9, testChar, 100);
+            n = write(fdttyS9, testChar, n);
+            usleep(100);
             tec->getPrintOut(testChar);
 
 
-            if (alitudeRate > MIN_ASCENT_RATE || motionInterupt || currentTime - bootTime > 4 * 3600)
+            if (balloon->ascentRate > MIN_ASCENT_RATE || motionInterupt || time(&currentTime) - bootTime > 4 * 3600)
             {
                 sbcState = takeoff;
                 motionInterupt = false;
@@ -151,10 +152,10 @@ int main()
             break;
         case takeoff:
 
-            if (alitudeRate < MIN_ASCENT_RATE)
+            if (balloon->ascentRate < MIN_ASCENT_RATE)
             {
                 sbcState = cruising;
-                accel->setMotionFreefallInterupt(.1, 0b100, false);
+                accel->setMotionFreefallInterupt(.1, 0b001, false);
             }
             break;
         case cruising:

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ADCProcess_H
-#define	ADCProcess_H
+#ifndef ADC_H
+#define	ADC_H
 #include "i2c-dev.h"
 #include <linux/pci.h>
 #include <fcntl.h>

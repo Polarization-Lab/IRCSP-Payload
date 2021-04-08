@@ -81,10 +81,10 @@
     <IncludePath>C:\Users\Thor Neill\source\repos\IRSCP-Payload\IRCSPApp1\ts7800v2-utils-master;</IncludePath>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="AccelerometerProcess.h" />
+    <ClInclude Include="Accelerometer.h" />
     <ClCompile Include="main.cpp" />
-    <ClInclude Include="ADCProcess.h" />
-    <ClInclude Include="BalloonProcess.h" />
+    <ClInclude Include="ADC.h" />
+    <ClInclude Include="Balloon.h" />
     <ClInclude Include="i2c-dev.h" />
     <ClInclude Include="TECTTL.h" />
   </ItemGroup>

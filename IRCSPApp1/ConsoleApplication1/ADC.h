@@ -13,24 +13,30 @@
 #include <cstddef>
 #include <cstdio>
 #define ADC_CHIP_ADDRESS 0x54
+#define DIVIDER_RESISTANCE
 
 class ADC
 {
 public:
+	ADC();
+	ADC(int twifd);
+	~ADC();
+	int getFD();
+	void getADC(short*);
+	void getVoltage(float*);
+	float getVref();
+	static int ADC_init();
+	static int ADC_read(int twifd, uint8_t* data, uint16_t addr, int bytes);
+	static int ADC_write(int twifd, uint8_t* data, uint16_t addr, int bytes);
+
+private:
+
+protected:
 	int twifd;
 	short measurementArray[5];
 	float voltages[5]; //implement voltage to temperature outside class
 	float vref = 5; //5 volt
-	ADC();
-	ADC(int twifd);
-	~ADC();
 	void getADC();
-	short getADC(char);
-	static int ADC_init();
-	static int ADC_read(int twifd, uint8_t* data, uint16_t addr, int bytes);
-	static int ADC_write(int twifd, uint8_t* data, uint16_t addr, int bytes);
-private:
-
 };
 
 ADC::ADC()
@@ -47,6 +53,42 @@ ADC::~ADC()
 	close(twifd);
 }
 
+inline int ADC::getFD()
+{
+	return twifd;
+}
+
+inline void ADC::getADC() {
+	uint8_t buf[10];
+	short reg = 1280 + 14; // ADC regs are 1280-1535 (0x50-0x5F) gotten from source, 10bits each, RE
+	ADC_read(twifd, buf, reg, 10);
+	for (signed char i = 0; i <= 4; i++) {
+		measurementArray[i] = (buf[2 *(4 - i) + 1] << 7) + buf[2 * (4-i)];
+		voltages[i] = (measurementArray[i] * vref) / pow(2, 10);
+	}
+}
+
+inline void ADC::getADC(short* outputShortArray)
+{
+	getADC();
+	for (int i = 0; i < 5; i++) {
+		outputShortArray[i] = measurementArray[i];
+	}
+}
+
+inline void ADC::getVoltage(float* outputVoltageArray)
+{
+	getADC();
+	for (int i = 0; i < 5; i++) {
+		outputVoltageArray[i] = voltages[i];
+	}
+}
+
+inline float ADC::getVref()
+{
+	return vref;
+}
+
 int ADC::ADC_init(){
 static int fd = -1;
 fd = open("/dev/i2c-0", O_RDWR);
@@ -59,6 +101,7 @@ if (fd != -1) {
 
 return fd;
 }
+
 
 int ADC::ADC_read(int twifd, uint8_t* data, uint16_t addr, int bytes)
 {
@@ -116,17 +159,5 @@ int ADC::ADC_write(int twifd, uint8_t* data, uint16_t addr, int bytes)
 	}
 	return 0;
 }
-
-void ADC::getADC() {
-	uint8_t buf[10];
-	short reg = 1280 + 14; // ADC regs are 1280-1535 (0x50-5F) gotten from source, 10bits each, RE
-	ADC_read(twifd, buf, reg, 10);
-	for (signed char i = 4; i >= 0; i--) {
-		measurementArray[i] = (buf[2 * i + 1] << 7) + buf[2 * i];
-		voltages[i] = (measurementArray[i] * vref) / pow(2,10);
-	}
-
-}
-
 
 #endif

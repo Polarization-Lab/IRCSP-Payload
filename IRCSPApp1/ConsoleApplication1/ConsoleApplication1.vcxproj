@@ -87,6 +87,7 @@
     <ClInclude Include="Balloon.h" />
     <ClInclude Include="i2c-dev.h" />
     <ClInclude Include="TECTTL.h" />
+    <ClInclude Include="NTCThermistorDecoder.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

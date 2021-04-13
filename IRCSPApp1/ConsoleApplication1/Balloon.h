@@ -42,7 +42,6 @@ int Balloon::Balloon_init(void){
 	if (fd == -1) {
 		perror("ttyS1 failed to open");
 	}
-	time_t unixTime = time(NULL);
 	return fd;
 }
 
@@ -86,8 +85,8 @@ void Balloon::parse(char* NMEAmsg, tm* time, float* altitude)
 		time->tm_hour = atoi(temp);
 		temp[0] = pos[2];
 		temp[1] = pos[3];
-		time->tm_min = atoi(temp);
-		time->tm_sec = atoi(pos + 4);
+		time->tm_min = atoi(temp); 
+		time->tm_sec = atoi(pos + 4); //last one doesnt need temp constructor
 	}
 	if (altitude != NULL) {
 		for (int i = 0; i < 8; i++) {
@@ -123,7 +122,7 @@ float Balloon::subtracttm(tm source, tm subtractor) {
 Balloon::Balloon()
 {
 	fdRS232 = Balloon_init();
-	fdTelemetryOut = open("/GPStelemetry", O_CREAT | O_WRONLY);
+	fdTelemetryOut = open("/GPStelemetry", O_CREAT | O_WRONLY | O_APPEND | O_SYNC); //append to end, consider dir searching 
 	if (fdTelemetryOut == -1) perror("unable to open GPStelemetry");
 	if (tcgetattr(fdRS232, &tty) != 0) {
 		printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));

@@ -2,7 +2,7 @@
 #include <cmath>
 #include "TECTTL.h"
 #include "Accelerometer.h"
-#include "ADC.h"
+#include "NTCThermistorDecoder.h"
 #include "Balloon.h"
 #include <time.h>
 #include <sys/mman.h>
@@ -26,7 +26,10 @@ int main()
     time_t bootTime = time(NULL), currentTime; // stores epoch time; 
     volatile SBCstate sbcState = boot;
     Accelerometer* accel;
-    ADC* adc;
+    float temperatures[5];
+    NTCThermistorDecoder* adc;
+    bool adcChannels[5] = { 1 };
+    const float NTCparam[5][5] = { {3.3}, { 100000 }, { 25 + 273}, { 10000 }, { 3977 } }; //source voltage, resistors, reference Temp, thermistor reference temperature, thermistor sensitivty
     TECTTL* tec;
     Balloon* balloon;
     bool motionInterupt;
@@ -85,7 +88,7 @@ int main()
         {
         case boot:
             accel = new Accelerometer();
-            adc = new ADC(accel->twifd);
+            adc = new NTCThermistorDecoder(accel->twifd, adcChannels, NTCparam[0], NTCparam[1], NTCparam[2], NTCparam[3], NTCparam[4]);
             balloon = new Balloon();
             tec = new TECTTL();
 
@@ -109,8 +112,7 @@ int main()
             usleep(100);
             tec->getPrintOut(testChar);
 
-            adc->ADC_init();
-            adc->getADC();
+            adc->getTemp(temperatures);
 
             if (true && bootTime != .1)//boot check
                 sbcState = preflight;

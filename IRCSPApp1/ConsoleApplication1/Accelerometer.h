@@ -210,7 +210,7 @@ void Accelerometer::setTransientInterupt(float g, uint8_t axis) {
 
 void Accelerometer::accelerometer_reset() {
 	uint8_t command;
-	accelerometer_read(twifd, &command, 0X2A, 1);
+	accelerometer_read(twifd, &command, 0X2A, 1); //get ctl2 flags
 	accelerometer_write(twifd, &(command |= 0b01000000), 0x2B, 1); //set reset int cntl reg 2
 	usleep(100000);
 	accelerometer_write(twifd, &(command |= 0b1), 0x2A, 1); //set active in ctrl reg 

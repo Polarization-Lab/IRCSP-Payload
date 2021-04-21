@@ -61,7 +61,7 @@ void Balloon::readBuf() //needs testing
 		pTime = lastTime;
 		pAltitude = lastAltitude;
 		parse(NMEAbuf, &lastTime, &lastAltitude);
-		ascentRate = (lastAltitude - pAltitude) / subtracttm(lastTime, pTime);
+		ascentRate = (lastAltitude - pAltitude) / subtracttm(lastTime, pTime); //m/s
 #ifdef DEBUG
 		fprintf(stderr, NMEAbuf);
 #endif // DEBUG
@@ -122,18 +122,21 @@ float Balloon::subtracttm(tm source, tm subtractor) {
 Balloon::Balloon()
 {
 	fdRS232 = Balloon_init();
-	fdTelemetryOut = open("/GPStelemetry", O_CREAT | O_WRONLY | O_APPEND | O_SYNC); //append to end, consider dir searching 
+	fdTelemetryOut = open("/GPStelemetry", O_CREAT | O_WRONLY | O_SYNC); //append to end, consider dir searching 
 	if (fdTelemetryOut == -1) perror("unable to open GPStelemetry");
 	if (tcgetattr(fdRS232, &tty) != 0) {
 		printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
 	}
 	cfmakeraw(&tty);
-	tty.c_cflag &= ~(PARENB | CSTOPB);
+	tty.c_cflag &= ~(PARENB | CSTOPB); //no parity, single stop bit
+	tty.c_cflag &= ~CRTSCTS; //no flow control
 	tty.c_lflag |= ICANON; //canon read() gets up to next \n, \r, or \0 chracter
+	cfsetispeed(&tty, B600); //baud 600
 
 	if (tcsetattr(fdRS232, TCSANOW, &tty) != 0) {
 		printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
 	}
+
 }
 
 Balloon::~Balloon()

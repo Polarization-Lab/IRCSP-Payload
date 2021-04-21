@@ -10,8 +10,8 @@ public:
 	bool channels[5];
 	void getTemp();
 	void getTemp(float[5]);
-	NTCThermistorDecoder(bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5]);
-	NTCThermistorDecoder(int twifd, bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5]);
+	NTCThermistorDecoder(bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5][4]);
+	NTCThermistorDecoder(int twifd, bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5][4]);
 	~NTCThermistorDecoder();
 protected:
 	float temperatures[5]; //in K
@@ -20,15 +20,17 @@ private:
 	float resistors[5];
 	float refTemp[5]; //in K
 	float thermistorRefResistance[5];
-	float thermistorSensitivity[5];
+	float thermistorSensitivity[5][4];
 };
 
 void NTCThermistorDecoder::getTemp()
 {
+	float resistanceRatio;
 	getADC();
 	for (int i = 0; i < 5; i++) {
 		if (channels[i]) {
-			temperatures[i] = (refTemp[i] + 273) * thermistorSensitivity[i] / (thermistorSensitivity[i] + log(((sourceVoltage[i] - voltages[i]) * resistors[i] / (thermistorRefResistance[i] * voltages[i])))); //Vin/Vref = R2/(Rth + R2) //Rth = R0*exp(beta*(1/(T)-1/(T0)) Temp in K
+			resistanceRatio = (2*sourceVoltage[i] / voltages[i] - 2) * resistors[i]/thermistorRefResistance[i];
+			temperatures[i] = 1 / (thermistorSensitivity[i][0] + thermistorSensitivity[i][1] * log(resistanceRatio) + thermistorSensitivity[i][2] * pow(log(resistanceRatio), 2) + thermistorSensitivity[i][3] * pow(log(resistanceRatio), 2));
 		}
 		else {
 			temperatures[i] = -1;
@@ -43,7 +45,7 @@ inline void NTCThermistorDecoder::getTemp(float tempOut[5])
 		tempOut[i] = temperatures[i];
 }
 
-NTCThermistorDecoder::NTCThermistorDecoder(bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5])
+NTCThermistorDecoder::NTCThermistorDecoder(bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5][4])
 {
 	for (int i = 0; i < 5; i++) {
 		this->channels[i] = channels[i];
@@ -51,11 +53,13 @@ NTCThermistorDecoder::NTCThermistorDecoder(bool channels[5], const float sourceV
 		this->resistors[i] = resistors[i];
 		this->refTemp[i] = refTemp[i];
 		this->thermistorRefResistance[i] = thermistorRefResistance[i];
-		this->thermistorSensitivity[i] = thermistorSensitivity[i];
+		for (int j = 0; j < 4; j++) {
+			this->thermistorSensitivity[i][j] = thermistorSensitivity[i][j];
+		}
 	}
 }
 
-inline NTCThermistorDecoder::NTCThermistorDecoder(int twifd, bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5]) : ADC(twifd)
+inline NTCThermistorDecoder::NTCThermistorDecoder(int twifd, bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5][4]) : ADC(twifd)
 {
 	for (int i = 0; i < 5; i++) {
 		this->channels[i] = channels[i];
@@ -63,7 +67,9 @@ inline NTCThermistorDecoder::NTCThermistorDecoder(int twifd, bool channels[5], c
 		this->resistors[i] = resistors[i];
 		this->refTemp[i] = refTemp[i];
 		this->thermistorRefResistance[i] = thermistorRefResistance[i];
-		this->thermistorSensitivity[i] = thermistorSensitivity[i];
+		for (int j = 0; j < 4; j++) {
+			this->thermistorSensitivity[i][j] = thermistorSensitivity[i][j];
+		}
 	}
 }
 

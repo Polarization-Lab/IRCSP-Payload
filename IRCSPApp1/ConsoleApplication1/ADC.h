@@ -63,8 +63,8 @@ inline void ADC::getADC() {
 	short reg = 1280 + 14; // ADC regs are 1280-1535 (0x50-0x5F) gotten from source, 10bits each, RE
 	ADC_read(twifd, buf, reg, 10);
 	for (signed char i = 0; i <= 4; i++) {
-		measurementArray[i] = (buf[2 *(4 - i) + 1] << 7) + buf[2 * (4-i)];
-		voltages[i] = (measurementArray[i] * vref) / pow(2, 10);
+		measurementArray[i] = (buf[2 *(4 - i) + 1] << 8) + buf[2 * (4-i)];
+		voltages[i] = (measurementArray[i] * vref) / (pow(2, 10) - 1);
 	}
 }
 

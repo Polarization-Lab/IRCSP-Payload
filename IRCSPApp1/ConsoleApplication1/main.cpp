@@ -10,7 +10,8 @@
 #include <unistd.h>
 #include <termios.h>
 #define MIN_ASCENT_RATE 60/60 //60 m/60 sec == 200ft / 60sec
-#define DEBUG
+#define MAX_PREFLIGHT_TIME 4*3600 //seconds
+//#define DEBUG
 
 #ifdef DEBUG
 #include <pwd.h>
@@ -29,11 +30,12 @@ int main()
     float temperatures[5];
     NTCThermistorDecoder* adc;
     bool adcChannels[5] = { 1 };
-    const float NTCparam[5][5] = { {3.3}, { 100000 }, { 25 + 273}, { 10000 }, { 3977 } }; //source voltage, resistors, reference Temp, thermistor reference temperature, thermistor sensitivty
+    const float NTCparam[4][5] = { {4.46}, { 10700 }, { 25 + 273}, { 10000 } }; //source voltage, resistors, reference Temp, thermistor reference temperature, thermistor sensitivty
+    const float NKA103C1R1CCoef[5][4] = { { 3.3539438E-03, 2.5646095E-04, 2.5158166E-6, 1.0503069E-07} }; 
     TECTTL* tec;
     Balloon* balloon;
     bool motionInterupt;
-    char testChar[256] = "empty", testMsg[256];
+    char testChar[256] = "empty", testMsg[256], testChar2[256];
     
     uint8_t settings[4];
 
@@ -48,76 +50,72 @@ int main()
         syscon_phy = (__off_t)0xFC081000;
     }
 
-    unsigned int* syscon = (unsigned int*)mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, devmem, syscon_phy); //shares the FPGA syscondition address for R/W // any address, page size, permisions, properties, file descriptor, offset to FPGA
+    volatile unsigned int* syscon = (unsigned int*)mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, devmem, syscon_phy); //shares the FPGA syscondition address for R/W // any address, page size, permisions, properties, file descriptor, offset to FPGA
 
 #ifdef DEBUG
 
     struct passwd* pw = getpwuid(getuid());
 
     const char* homedir = pw->pw_dir;
-
+#endif // DEBUG
     //int fdttyS8 = open("/dev/ttyS8", O_RDWR | O_SYNC);
     ////unsigned char* conttyS8 = (unsigned char*)mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, fdttyS8, 0);
 
     //int fdttyS1 = open("/dev/ttyS1", O_RDWR | O_SYNC);
     ////unsigned char* conttyS1 = (unsigned char*)mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, fdttyS1, 0);
 
-    int fdttyS7 = open("/dev/ttyS7", O_RDWR | O_NONBLOCK | O_NOCTTY); //com3 rs232
-    struct termios ttyS7;
-    tcgetattr(fdttyS7, &ttyS7);
-    cfmakeraw(&ttyS7);
-    ttyS7.c_cflag &= ~(PARENB | CSTOPB);
-    ttyS7.c_lflag |= ICANON;
-    tcsetattr(fdttyS7, TCSANOW, &ttyS7);
+    accel = new Accelerometer();
+    adc = new NTCThermistorDecoder(accel->twifd, adcChannels, NTCparam[0], NTCparam[1], NTCparam[2], NTCparam[3], NKA103C1R1CCoef);
+    balloon = new Balloon();
+    tec = new TECTTL();
 
-    int fdttyS9 = open("/dev/ttyS9", O_RDWR | O_NONBLOCK | O_NOCTTY); //extra lcd ttl
+    int fdttyS9 = open("/dev/ttyS9", O_RDWR | O_NONBLOCK ); //com3 rs232
     struct termios ttyS9;
-    tcgetattr(fdttyS9, &ttyS9);
-    cfmakeraw(&ttyS9);
-    ttyS9.c_cflag &= ~(PARENB | CSTOPB);
-    ttyS9.c_lflag &= ~ICANON;
+    tcgetattr(tec->getfd(), &ttyS9);
     tcsetattr(fdttyS9, TCSANOW, &ttyS9);
 
+    //int fdttyS9 = open("/dev/ttyS9", O_RDWR | O_NONBLOCK | O_NOCTTY); //extra GPIO ttl
+    //struct termios ttyS9;
+    //tcgetattr(fdttyS9, &ttyS9);
+    //cfmakeraw(&ttyS9);
+    //ttyS9.c_cflag &= ~(PARENB | CSTOPB);
+    //ttyS9.c_lflag &= ~ICANON;
+    //tcsetattr(fdttyS9, TCSANOW, &ttyS9);
+
     fprintf(stderr, "new test\n");
-#endif // DEBUG
+
 
     int n = 10;
     
     while (1) {//automata loop
+
         switch (sbcState) //state handler
         {
         case boot:
-            accel = new Accelerometer();
-            adc = new NTCThermistorDecoder(accel->twifd, adcChannels, NTCparam[0], NTCparam[1], NTCparam[2], NTCparam[3], NTCparam[4]);
-            balloon = new Balloon();
-            tec = new TECTTL();
-
-            usleep(100); //sleep to let messages pass 
-            n = read(fdttyS9, testChar,25);
-            n = write(fdttyS9, testChar, n);
-            usleep(100);
-            tec->getPrintOut(testChar);
-
-            accel->setMotionFreefallInterupt((float)1.25,0b100,true);
+#ifdef DEBUGSTATE
+            fprintf(stderr, "boot\n");
+#endif // DEBUG
+            
 #ifdef DEBUG
             Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
 #endif // DEBUG
 
             accel->getAcceleration();
 
-            tec->setParams(30, 1, 1, 1);
-            usleep(100);
-            n = read(fdttyS9, testChar, 100);
-            n = write(fdttyS9, testChar, n);
-            usleep(100);
-            tec->getPrintOut(testChar);
-
-            adc->getTemp(temperatures);
+            /*n = read(fdttyS9, testChar, 100);
+            n = write(fdttyS9, testChar, n);*/
+            
 
             if (true && bootTime != .1)//boot check
+            {
                 sbcState = preflight;
+                accel->setMotionFreefallInterupt((float)1.25, 0b100, true);
+            }
             break;
         case preflight:
+#ifdef DEBUGSTATE
+            fprintf(stderr, "preflight\n");
+#endif // DEBUG
             if (true)//time since last check > 1min
             {
                 motionInterupt = accel->checkMotionInteruptFlag(NULL);
@@ -125,35 +123,40 @@ int main()
                 accel->getAcceleration();
 #endif // DEBUG
             }
+            tec->clearBuffer();
+            tec->sendParams();
+            tec->getSingleReadout(testChar);
+            fprintf(stderr, "I am: %s", testChar);
+            tec->setParams(-20, 6, 4, 2);
+            tec->getSingleReadout(testChar2);
+            adc->getTemp(temperatures);
+            fprintf(stderr, "Hot Side: %+.2f, Cold Side: %+.2f", temperatures[0] - 273.15, tec->Tr);
+            
 
+            adc->getTemp(temperatures);
             syscon[(0xc / 4)] &= ~(1 << 20); //turn red led off
             syscon[(0xc / 4)] |= (1 << 20); //turn red led on
 
-            strcpy(testMsg,"$GPGGA,233656.000,3146.75029,N,09542.98104,W,1,12,0.8,138.42,M,-24.0,M,,*52\r\n");
-            write(fdttyS7, testMsg, strlen(testMsg)); //note doesnt send '\0'
-            usleep(100);
+            //strcpy(testMsg,"$GPGGA,233656.000,3146.75029,N,09542.98104,W,1,12,0.8,138.42,M,-24.0,M,,*52\r\n");
+            //write(fdttyS7, testMsg, strlen(testMsg)); //note doesnt send '\0'
+            //usleep(100);
+            //balloon->readBuf();
+            //strcpy(testMsg, "$GPGGA,233707.000,3146.75029,N,09542.98104,W,1,13,0.8,238.42,M,-24.0,M,,*56\r\n");
+            //write(fdttyS7, testMsg, strlen(testMsg));
+            //usleep(100);
             balloon->readBuf();
-            strcpy(testMsg, "$GPGGA,233707.000,3146.75029,N,09542.98104,W,1,13,0.8,238.42,M,-24.0,M,,*56\r\n");
-            write(fdttyS7, testMsg, strlen(testMsg));
-            usleep(100);
-            balloon->readBuf();
-
-            tec->sendParams();
-            usleep(100);
-            n = read(fdttyS9, testChar, 100);
-            n = write(fdttyS9, testChar, n);
-            usleep(100);
-            tec->getPrintOut(testChar);
 
 
-            if (balloon->ascentRate > MIN_ASCENT_RATE || motionInterupt || time(&currentTime) - bootTime > 4 * 3600)
+            if (balloon->ascentRate > MIN_ASCENT_RATE || motionInterupt || time(&currentTime) - bootTime > MAX_PREFLIGHT_TIME)
             {
                 sbcState = takeoff;
                 motionInterupt = false;
             }
             break;
         case takeoff:
-
+#ifdef DEBUGSTATE
+            fprintf(stderr, "takeoff\n");
+#endif // DEBUG
             if (balloon->ascentRate < MIN_ASCENT_RATE)
             {
                 sbcState = cruising;
@@ -161,6 +164,9 @@ int main()
             }
             break;
         case cruising:
+#ifdef DEBUGSTATE
+            fprintf(stderr, "cruising\n");
+#endif // DEBUG
             if (true)
                 motionInterupt = accel->checkMotionInteruptFlag(NULL);
             if (motionInterupt)

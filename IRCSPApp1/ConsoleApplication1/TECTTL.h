@@ -1,10 +1,10 @@
 #pragma once
 #ifndef TECTTL_H
 #define TECTTL_H
-#define TIMEOUT 20
 #define COEFFICIENT_MIN 0.0
 #define COEFFICIENT_MAX 20.0
-#define MAX_MESSAGE_SIZE 64
+#define MAX_MESSAGE_SIZE 80 //characters
+#define MIN_CONTROLLER_DELAY 1000000 //us, seems to be around 400ms, experimentally determined
 #define DEBUG
 
 #include <fcntl.h>
@@ -19,14 +19,12 @@
 
 class TECTTL //TODO:: Use SYSCON to optimize listening time
 {
-	int fd; //filedescriptor associated ttts file descriptor for TTL
-	float setpoint; //degrees C
-	float PID[3] = { 0, 0, 0 }; //pid coefficients 
-	float min = -70; //defines OC behavior and LED behavior 
-	float max = 70;
-	struct termios tty;
-
 public:
+	
+	float Tr;
+	bool OC;
+	float PWM;
+
 	TECTTL();
 	TECTTL(float, float , float , float );
 	TECTTL(float, float , float , float, float, float);
@@ -36,16 +34,28 @@ public:
 
 	static int initTTLDIO();
 	void sendParams();
-	void getPrintOut(char* outbuf); //move this to private later
-	void clearBuffer();
+	void getSingleReadout(char* outbuf);
+	int clearBuffer();
 	void singleByteCommand(char); //A: turn on. a: turn off. R: turn ON cyclic print. r: turn OFF cyclic print. o: print single readout
 	void setParams(float, float, float, float, float, float);
 	void setParams(float, float, float, float);
 	void setParams(float setpoint, float PID[3], float minTemp, float maxTemp);
 	void setParams(float setpoint, float PID[3]);
-	
+	int getfd();
+
+protected:
+	int fd; //filedescriptor associated ttts file descriptor for TTL
+	float setpoint = 0; //degrees C
+	float PID[3] = { 0, 0, 0 }; //pid coefficients 
+	float min = -100; //defines OC behavior and LED behavior 
+	float max = 100;
+	struct termios tty;
+
+	int getLineOut(char* outbuf);
+
 private:
 	void initTermios();
+
 };
 
 TECTTL::TECTTL() {
@@ -88,22 +98,25 @@ TECTTL::~TECTTL()
 
 void TECTTL::sendParams() { //might need ioctl
 	 int n;
-	 std::string msg;
-	 msg = '<' + std::to_string(this->setpoint) + ' ' + std::to_string(this->PID[0]) + ' ' + std::to_string(this->PID[1]) + ' ' + std::to_string(this->PID[2]) + ' ' + std::to_string(this->min) + ' ' + std::to_string(this->max) + '>' + '\r' + '\n';
-	 char message[msg.length()];
-	 strcpy(message, msg.c_str());
-	 n = write(this->fd, message, strlen(message)); //cuts off \0 character
+	 char msg[MAX_MESSAGE_SIZE];
+	 n = sprintf(msg, "<%.2f %.2f %.2f %.2f %.2f>\n", setpoint, PID[0], PID[1], PID[2], min, max);
+	 n = write(this->fd, msg, strlen(msg)); //cuts off \0 character
 }
 
 void TECTTL::singleByteCommand(char in) {
-	char msg[3] = { in, '\r', '\n'};
-	int n = write(this->fd, msg, 3);
+	char msg[2] = { in, '\n'};
+	int n = write(this->fd, msg, 2);
 }
 
 int TECTTL::initTTLDIO() {
-	int fd = open("/dev/ttyS8", O_RDWR | O_NONBLOCK | O_NOCTTY);//linux header that handles chosen DIO pins
-	if (fd == -1) { perror("unable to open ttyS6"); }
+	int fd = open("/dev/ttyS8", O_RDWR | O_NONBLOCK );//linux header that handles chosen DIO pins
+	if (fd == -1) { perror("unable to open ttyS8"); }
 	else return fd;
+}
+
+inline int TECTTL::getfd()
+{
+	return fd;
 }
 
 void TECTTL::setParams(float setpoint, float PID[3], float minTemp, float maxTemp) {
@@ -129,27 +142,56 @@ void TECTTL::setParams(float setpoint, float P, float I, float D) {
 	sendParams();
 }
 
-void TECTTL::getPrintOut(char* outbuf) {
+int TECTTL::getLineOut(char* outbuf) {
 	int n = read(fd, outbuf, MAX_MESSAGE_SIZE);
 	if (n > -1){
 		outbuf[n] = '\0';
 #ifdef DEBUG
 		fprintf(stderr, outbuf);
 #endif // DEBUG
-	} 
+	}
+	return n;
 }
 
+void TECTTL::getSingleReadout(char* outbuf) {
+	int n;
+	char* temp;
+	clearBuffer();
+	singleByteCommand('o');
+	usleep(MIN_CONTROLLER_DELAY);
+	do {
+		n = getLineOut(outbuf);
+		if (n == -1) {
+			return;
+		}
+		temp = strstr(outbuf, "Tr=");
+	} while (temp == NULL);
+	Tr = strtof(temp + 3, &temp);
+	OC = strtol(temp + 4, &temp, 2);
+	PWM = strtof(temp + 4, &temp);
+	return;
+}
+
+int TECTTL::clearBuffer() {
+	char buf[MAX_MESSAGE_SIZE];
+	int i = 0;
+	usleep(MIN_CONTROLLER_DELAY);
+	while (getLineOut(buf) > -1) i++;
+}
 
 void TECTTL::initTermios() {
 	if (tcgetattr(fd, &tty) != 0) {
 		printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
 	}
 	cfmakeraw(&tty);
-	tty.c_cflag &= ~(PARENB | CSTOPB);
-	tty.c_lflag &= ~ICANON; //read() doesnt get up to next \n, \r, or \0 chracter
+	tty.c_iflag |= IGNCR; //ignore carriage return
+	tty.c_cflag &= ~(PARENB | CSTOPB); //no parity, one stop bits
+	tty.c_cflag &= ~(CRTSCTS | ECHO); //disable flow control & echo; EXTREMELY IMPORTANT
+	tty.c_lflag |= ICANON; //read() doesnt get up to next \n, \r, or \0 chracter
 	//tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL);
 	//tty.c_oflag &= ~OPOST;
 	//tty.c_oflag &= ~ONLCR;
+	cfsetispeed(&tty, B38400);
 	if (tcsetattr(fd, TCSANOW, &tty) != 0) {
 		printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
 	}

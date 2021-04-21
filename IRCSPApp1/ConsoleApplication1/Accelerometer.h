@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ACCELEROMETER_H
 #define	ACCELEROMETER_H
 #include "i2c-dev.h"

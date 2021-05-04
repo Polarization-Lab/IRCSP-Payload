@@ -42,7 +42,7 @@ inline void NTCThermistorDecoder::getTemp(float tempOut[5])
 {
 	getTemp();
 	for (int i = 0; i < 5; i++)
-		tempOut[i] = temperatures[i];
+		tempOut[i] = temperatures[i] - 273.15;
 }
 
 NTCThermistorDecoder::NTCThermistorDecoder(bool channels[5], const float sourceVoltage[5], const float resistors[5], const float refTemp[5], const float thermistorRefResistance[5], const float thermistorSensitivity[5][4])

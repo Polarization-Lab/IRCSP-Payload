@@ -4,8 +4,8 @@
 #define COEFFICIENT_MIN 0.0
 #define COEFFICIENT_MAX 20.0
 #define MAX_MESSAGE_SIZE 80 //characters
-#define MIN_CONTROLLER_DELAY 1000000 //us, seems to be around 400ms, experimentally determined
-#define DEBUG
+#define MIN_TTL_DELAY 20000 //us, takes 8.3ms to send 80 characters (160 bits) two ways @ 38400 baud
+
 
 #include <fcntl.h>
 #include <stdint.h>
@@ -158,7 +158,7 @@ void TECTTL::getSingleReadout(char* outbuf) {
 	char* temp;
 	clearBuffer();
 	singleByteCommand('o');
-	usleep(MIN_CONTROLLER_DELAY);
+	usleep(MIN_TTL_DELAY);
 	do {
 		n = getLineOut(outbuf);
 		if (n == -1) {
@@ -175,7 +175,6 @@ void TECTTL::getSingleReadout(char* outbuf) {
 int TECTTL::clearBuffer() {
 	char buf[MAX_MESSAGE_SIZE];
 	int i = 0;
-	usleep(MIN_CONTROLLER_DELAY);
 	while (getLineOut(buf) > -1) i++;
 }
 

@@ -9,8 +9,13 @@
 #include <linux/pci.h>
 #include <unistd.h>
 #include <termios.h>
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+
 #define MIN_ASCENT_RATE 60/60 //60 m/60 sec == 200ft / 60sec
-#define MAX_PREFLIGHT_TIME 4*3600 //seconds
+#define MAX_PREFLIGHT_TIME 60 //seconds
 //#define DEBUG
 
 #ifdef DEBUG
@@ -18,14 +23,15 @@
 #endif // DEBUG
 
 
-typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, falling } SBCstate; //SBC states
+typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, falling, lowTemp } SBCstate; //SBC states
 
 static __off_t get_fpga_phy(void);
 
 int main()
 {   
-    time_t bootTime = time(NULL), currentTime; // stores epoch time; 
-    volatile SBCstate sbcState = boot;
+    time_t bootTime = time(NULL), currentTime, lastAccelCheck = bootTime; // stores epoch time; 
+    volatile SBCstate lastState, sbcState = boot;
+    
     Accelerometer* accel;
     float temperatures[5];
     NTCThermistorDecoder* adc;
@@ -34,7 +40,9 @@ int main()
     const float NKA103C1R1CCoef[5][4] = { { 3.3539438E-03, 2.5646095E-04, 2.5158166E-6, 1.0503069E-07} }; 
     TECTTL* tec;
     Balloon* balloon;
+    
     bool motionInterupt;
+    int childPid, childStatus;
     char testChar[256] = "empty", testMsg[256], testChar2[256];
     
     uint8_t settings[4];
@@ -51,7 +59,7 @@ int main()
     }
 
     volatile unsigned int* syscon = (unsigned int*)mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED, devmem, syscon_phy); //shares the FPGA syscondition address for R/W // any address, page size, permisions, properties, file descriptor, offset to FPGA
-
+    int n;
 #ifdef DEBUG
 
     struct passwd* pw = getpwuid(getuid());
@@ -68,74 +76,72 @@ int main()
     adc = new NTCThermistorDecoder(accel->twifd, adcChannels, NTCparam[0], NTCparam[1], NTCparam[2], NTCparam[3], NKA103C1R1CCoef);
     balloon = new Balloon();
     tec = new TECTTL();
+    sleep(1);
 
-    int fdttyS9 = open("/dev/ttyS9", O_RDWR | O_NONBLOCK ); //com3 rs232
-    struct termios ttyS9;
-    tcgetattr(tec->getfd(), &ttyS9);
-    tcsetattr(fdttyS9, TCSANOW, &ttyS9);
-
-    //int fdttyS9 = open("/dev/ttyS9", O_RDWR | O_NONBLOCK | O_NOCTTY); //extra GPIO ttl
+    //int fdttyS9 = open("/dev/ttyS9", O_RDWR | O_NONBLOCK ); //com3 rs232
     //struct termios ttyS9;
-    //tcgetattr(fdttyS9, &ttyS9);
-    //cfmakeraw(&ttyS9);
-    //ttyS9.c_cflag &= ~(PARENB | CSTOPB);
-    //ttyS9.c_lflag &= ~ICANON;
+    //tcgetattr(tec->getfd(), &ttyS9);
     //tcsetattr(fdttyS9, TCSANOW, &ttyS9);
 
+
+    #ifdef DEBUG
     fprintf(stderr, "new test\n");
-
-
-    int n = 10;
+    #endif
     
     while (1) {//automata loop
 
         switch (sbcState) //state handler
         {
+        
         case boot:
-#ifdef DEBUGSTATE
+        #ifdef DEBUGSTATE
             fprintf(stderr, "boot\n");
-#endif // DEBUG
+        #endif // DEBUG
             
-#ifdef DEBUG
+        #ifdef DEBUG
             Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
-#endif // DEBUG
-
-            accel->getAcceleration();
+        #endif // DEBUG
 
             /*n = read(fdttyS9, testChar, 100);
             n = write(fdttyS9, testChar, n);*/
             
 
-            if (true && bootTime != .1)//boot check
+            if (true && bootTime != .1)//boot check //do once while leaving
             {
                 sbcState = preflight;
-                accel->setMotionFreefallInterupt((float)1.25, 0b100, true);
+                accel->setMotionFreefallInterupt((float)1.4, 0b100, true);
+                tec->setParams(0, 4, 4, 0);
+                sleep(1);
             }
             break;
+        
         case preflight:
-#ifdef DEBUGSTATE
+
+            #ifdef DEBUGSTATE
             fprintf(stderr, "preflight\n");
-#endif // DEBUG
-            if (true)//time since last check > 1min
+            #endif // DEBUG
+            if ((n= time(&currentTime)-lastAccelCheck) >= 60)//time since last check > 1min
             {
+                lastAccelCheck = currentTime;
                 motionInterupt = accel->checkMotionInteruptFlag(NULL);
-#ifdef DEBUG
+                #ifdef DEBUG
                 accel->getAcceleration();
-#endif // DEBUG
+                #endif // DEBUG
             }
-            tec->clearBuffer();
+            adc->getTemp(temperatures);
+            balloon->readBuf();
+
+           /* tec->clearBuffer();
             tec->sendParams();
             tec->getSingleReadout(testChar);
             fprintf(stderr, "I am: %s", testChar);
-            tec->setParams(-20, 6, 4, 2);
             tec->getSingleReadout(testChar2);
             adc->getTemp(temperatures);
             fprintf(stderr, "Hot Side: %+.2f, Cold Side: %+.2f", temperatures[0] - 273.15, tec->Tr);
+            */
             
-
-            adc->getTemp(temperatures);
-            syscon[(0xc / 4)] &= ~(1 << 20); //turn red led off
-            syscon[(0xc / 4)] |= (1 << 20); //turn red led on
+            //syscon[(0xc / 4)] &= ~(1 << 20); //turn red led off
+            //syscon[(0xc / 4)] |= (1 << 20); //turn red led on
 
             //strcpy(testMsg,"$GPGGA,233656.000,3146.75029,N,09542.98104,W,1,12,0.8,138.42,M,-24.0,M,,*52\r\n");
             //write(fdttyS7, testMsg, strlen(testMsg)); //note doesnt send '\0'
@@ -144,36 +150,91 @@ int main()
             //strcpy(testMsg, "$GPGGA,233707.000,3146.75029,N,09542.98104,W,1,13,0.8,238.42,M,-24.0,M,,*56\r\n");
             //write(fdttyS7, testMsg, strlen(testMsg));
             //usleep(100);
-            balloon->readBuf();
 
-
-            if (balloon->ascentRate > MIN_ASCENT_RATE || motionInterupt || time(&currentTime) - bootTime > MAX_PREFLIGHT_TIME)
+            if (true || balloon->ascentRate > MIN_ASCENT_RATE || motionInterupt || time(&currentTime) - bootTime > MAX_PREFLIGHT_TIME) //do once while leaving
             {
                 sbcState = takeoff;
                 motionInterupt = false;
+                tec->singleByteCommand('A');
+                sleep(1);
+                if ((childPid = fork()) == 0)
+                {
+                    system("ts7800ctl -t");
+                    execlp("ts7800ctl", "ts7800ctl", "-t", NULL);
+                }
+                waitpid(childPid, &childStatus, 0);
             }
             break;
+
         case takeoff:
-#ifdef DEBUGSTATE
+            #ifdef DEBUGSTATE
             fprintf(stderr, "takeoff\n");
-#endif // DEBUG
-            if (balloon->ascentRate < MIN_ASCENT_RATE)
+            #endif // DEBUG
+            balloon->readBuf();
+            adc->getTemp(temperatures);
+            //get camera temperature
+
+            if (balloon->ascentRate < MIN_ASCENT_RATE) //do once while leaving
             {
                 sbcState = cruising;
-                accel->setMotionFreefallInterupt(.1, 0b001, false);
+                accel->setMotionFreefallInterupt(.1, 0b100, false);
+                tec->setParams(-20, 4, 4, 0);
+                sleep(1);
+            }
+
+            if (temperatures[0] <= -40) { //check camera temperatures
+                lastState = sbcState;
+                tec->setParams(-20, 20, 0, 0);
+                //user signal turn off cameras
+                sleep(1);
             }
             break;
+
         case cruising:
-#ifdef DEBUGSTATE
+            balloon->readBuf();
+            adc->getTemp(temperatures);
+            //get camera temp
+
+            #ifdef DEBUGSTATE
             fprintf(stderr, "cruising\n");
-#endif // DEBUG
-            if (true)
+            #endif // DEBUG
+            if ((n = time(&currentTime) - lastAccelCheck) >= 60) {
+                lastAccelCheck = currentTime;
                 motionInterupt = accel->checkMotionInteruptFlag(NULL);
-            if (motionInterupt)
+            }
+            
+            if (motionInterupt) {
+                kill(childPid, SIGTERM);
                 sbcState = falling;
+            }
+
+            if (temperatures[0] <= -40) {
+                lastState = sbcState;
+                tec->setParams(-20, 20, 0, 0);
+                //user signal turn off cameras
+                sleep(1);
+            }
             break;
+
         case falling:
+            #ifdef DEBUGSTATE
+            fprintf(stderr, "falling\n");
+            #endif // DEBUG
+            delete balloon;
+            delete tec;
+            delete accel;
+            delete adc;
+            system("ts7800ctl -s 3600");
             break;
+
+        case lowTemp:
+            adc->getTemp(temperatures);
+            if (temperatures[0] > -40) {
+                sbcState = lastState;
+                tec->setParams(-20, 20, 0, 0);
+                //user signal turn on camreas
+                sleep(1);
+            }
         }
     }
 }

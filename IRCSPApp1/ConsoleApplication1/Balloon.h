@@ -15,7 +15,7 @@
 #include <termios.h>
 
 #define MAX_NMEA_SIZE 82
-#define DEBUG
+
 class Balloon
 {
 public:
@@ -129,7 +129,7 @@ Balloon::Balloon()
 	}
 	cfmakeraw(&tty);
 	tty.c_cflag &= ~(PARENB | CSTOPB); //no parity, single stop bit
-	tty.c_cflag &= ~CRTSCTS; //no flow control
+	tty.c_cflag &= ~(CRTSCTS | ECHO); //no flow control no echo
 	tty.c_lflag |= ICANON; //canon read() gets up to next \n, \r, or \0 chracter
 	cfsetispeed(&tty, B600); //baud 600
 

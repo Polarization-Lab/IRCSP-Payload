@@ -15,7 +15,7 @@
 #include <signal.h>
 
 #define MIN_ASCENT_RATE 60/60 //60 m/60 sec == 200ft / 60sec
-#define MAX_PREFLIGHT_TIME 60 //seconds
+#define MAX_PREFLIGHT_TIME 4*60*60 //seconds
 //#define DEBUG
 
 #ifdef DEBUG
@@ -151,7 +151,7 @@ int main()
             //write(fdttyS7, testMsg, strlen(testMsg));
             //usleep(100);
 
-            if (true || balloon->ascentRate > MIN_ASCENT_RATE || motionInterupt || time(&currentTime) - bootTime > MAX_PREFLIGHT_TIME) //do once while leaving
+            if ( balloon->ascentRate > MIN_ASCENT_RATE || motionInterupt || time(&currentTime) - bootTime > MAX_PREFLIGHT_TIME) //do once while leaving
             {
                 sbcState = takeoff;
                 motionInterupt = false;

@@ -159,10 +159,8 @@ int main()
                 sleep(1);
                 if ((childPid = fork()) == 0)
                 {
-                    system("ts7800ctl -t");
-                    execlp("ts7800ctl", "ts7800ctl", "-t", NULL);
+                    execlp("/mnt/sdcard/imagecapture/image_capture.py", "image_capture.py");
                 }
-                waitpid(childPid, &childStatus, 0);
             }
             break;
 

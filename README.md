@@ -18,5 +18,5 @@ Eddie Contreras  <br />
 Thor Niell  <br />
 Wassim Khawam
 
-** Undergraduate Research Assistants **
+**Undergraduate Research Assistants**
 Atkin Hyatt <br />

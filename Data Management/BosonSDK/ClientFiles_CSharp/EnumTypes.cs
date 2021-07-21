@@ -1,0 +1,370 @@
+//  /////////////////////////////////////////////////////
+//  // DO NOT EDIT.  This is a machine generated file. //
+//  /////////////////////////////////////////////////////
+
+/******************************************************************************/
+/*                                                                            */
+/*  Copyright (C) 2018, FLIR Systems                                          */
+/*  All rights reserved.                                                      */
+/*                                                                            */
+/*  This document is controlled to FLIR Technology Level 2. The information   */
+/*  contained in this document pertains to a dual use product controlled for  */
+/*  export by the Export Administration Regulations (EAR). Diversion contrary */
+/*  to US law is prohibited. US Department of Commerce authorization is not   */
+/*  required prior to export or transfer to foreign persons or parties unless */
+/*  otherwise prohibited.                                                     */
+/*                                                                            */
+/******************************************************************************/
+
+
+// Garbage Variable to avoid ever having blank code
+namespace Boson {
+	public partial class Camera {
+		public enum FLR_ENABLE_E : int {
+			FLR_DISABLE = 0,
+			FLR_ENABLE = 1,
+			FLR_ENABLE_END = 2,
+		}
+		
+		public enum FLR_GAO_NUC_TYPE_E : int {
+			FLR_GAO_NUC_TYPE_ONE_POINT_FFC = 0,
+			FLR_GAO_NUC_TYPE_TWO_POINT_FIELD = 1,
+			FLR_GAO_NUC_TYPE_TWO_POINT_FACTORY = 2,
+			FLR_GAO_NUC_TYPE_END = 3,
+		}
+		
+		public enum FLR_ROIC_TEMP_MODE_E : int {
+			FLR_ROIC_TEMP_NORMAL_MODE = 0,
+			FLR_ROIC_TEMP_OFFSET_MODE = 1,
+			FLR_ROIC_TEMP_STATIC_MODE = 2,
+			FLR_ROIC_TEMP_MODE_END = 3,
+		}
+		
+		public enum FLR_ROIC_EXT_SYNC_MODE_E : int {
+			FLR_ROIC_EXT_SYNC_DISABLE_MODE = 0,
+			FLR_ROIC_EXT_SYNC_MASTER_MODE = 1,
+			FLR_ROIC_EXT_SYNC_SLAVE_MODE = 2,
+			FLR_ROIC_EXT_SYNC_END = 3,
+		}
+		
+		public enum FLR_BPR_DISPLAY_MODE_E : int {
+			FLR_BPR_NORMAL_DISPLAY_MODE = 0,
+			FLR_BPR_MIN_VALUE_ONLY_MODE = 1,
+			FLR_BPR_MAX_VALUE_ONLY_MODE = 2,
+			FLR_BPR_MIN_MAX_TOGGLE_MODE = 3,
+			FLR_BPR_BPR_DISPLAY_MODE_END = 4,
+		}
+		
+		public enum FLR_TELEMETRY_LOC_E : int {
+			FLR_TELEMETRY_LOC_TOP = 0,
+			FLR_TELEMETRY_LOC_BOTTOM = 1,
+			FLR_TELEMETRY_LOC_END = 2,
+		}
+		
+		public enum FLR_TELEMETRY_PACKING_E : int {
+			FLR_TELEMETRY_PACKING_DEFAULT = 0,
+			FLR_TELEMETRY_PACKING_Y = 1,
+			FLR_TELEMETRY_PACKING_8BITS = 2,
+			FLR_TELEMETRY_PACKING_END = 3,
+		}
+		
+		public enum FLR_BOSON_GAINMODE_E : int {
+			FLR_BOSON_HIGH_GAIN = 0,
+			FLR_BOSON_LOW_GAIN = 1,
+			FLR_BOSON_AUTO_GAIN = 2,
+			FLR_BOSON_DUAL_GAIN = 3,
+			FLR_BOSON_MANUAL_GAIN = 4,
+			FLR_BOSON_GAINMODE_END = 5,
+		}
+		
+		public enum FLR_BOSON_FFCMODE_E : int {
+			FLR_BOSON_MANUAL_FFC = 0,
+			FLR_BOSON_AUTO_FFC = 1,
+			FLR_BOSON_EXTERNAL_FFC = 2,
+			FLR_BOSON_SHUTTER_TEST_FFC = 3,
+			FLR_BOSON_FFCMODE_END = 4,
+		}
+		
+		public enum FLR_BOSON_TIMESTAMPTYPE_E : int {
+			FLR_BOSON_UARTINIT = 0,
+			FLR_BOSON_PIXELCLOCKINIT = 1,
+			FLR_BOSON_AUTHEVENT = 2,
+			FLR_BOSON_FIRSTVALIDIMAGE = 3,
+			FLR_BOSON_TIMESTAMPTYPE_END = 4,
+		}
+		
+		public enum FLR_BOSON_FFCSTATUS_E : int {
+			FLR_BOSON_NO_FFC_PERFORMED = 0,
+			FLR_BOSON_FFC_IMMINENT = 1,
+			FLR_BOSON_FFC_IN_PROGRESS = 2,
+			FLR_BOSON_FFC_COMPLETE = 3,
+			FLR_BOSON_FFCSTATUS_END = 4,
+		}
+		
+		public enum FLR_BOSON_MYRIADTEMPMODE_E : int {
+			FLR_BOSON_NORMAL_MYRIADTEMP_MODE = 0,
+			FLR_BOSON_STATIC_MYRIADTEMP_MODE = 1,
+		}
+		
+		public enum FLR_BOSON_EXT_SYNC_MODE_E : int {
+			FLR_BOSON_EXT_SYNC_DISABLE_MODE = 0,
+			FLR_BOSON_EXT_SYNC_MASTER_MODE = 1,
+			FLR_BOSON_EXT_SYNC_SLAVE_MODE = 2,
+			FLR_BOSON_EXT_SYNC_END = 3,
+		}
+		
+		public enum FLR_BOSON_TEMP_DIODE_STATUS_E : int {
+			FLR_BOSON_TEMP_DIODE_NORMAL = 0,
+			FLR_BOSON_TEMP_DIODE_FAULT = 1,
+			FLR_BOSON_TEMP_DIODE_END = 2,
+		}
+		
+		public enum FLR_DVO_OUTPUT_FORMAT_E : int {
+			FLR_DVO_RGB = 0,
+			FLR_DVO_YCBCR = 1,
+			FLR_DVO_DEFAULT_FORMAT = 2,
+			FLR_DVO_IR16 = 3,
+			FLR_DVO_OUTPUT_FORMAT_END = 4,
+		}
+		
+		public enum FLR_DVO_OUTPUT_RGB_FORMAT_E : int {
+			FLR_DVO_RGB888 = 0,
+			FLR_DVO_MRGB888 = 1,
+			FLR_DVO_OUTPUT_RGB_FORMAT_END = 2,
+		}
+		
+		public enum FLR_DVO_OUTPUT_YCBCR_FORMAT_E : int {
+			FLR_DVO_YCBCR422_8B = 0,
+			FLR_DVO_MYCBCR422_8B = 1,
+			FLR_DVO_OUTPUT_YCBCR_FORMAT_END = 2,
+		}
+		
+		public enum FLR_DVO_OUTPUT_IR16_FORMAT_E : int {
+			FLR_DVO_IR16_16B = 0,
+			FLR_DVO_MIR16_8B = 1,
+			FLR_DVO_OUTPUT_IR16_FORMAT_END = 2,
+		}
+		
+		public enum FLR_DVO_OUTPUT_CBCR_ORDER_E : int {
+			FLR_DVO_CRCB = 0,
+			FLR_DVO_CBCR = 1,
+			FLR_DVO_OUTPUT_CBCR_ORDER_END = 2,
+		}
+		
+		public enum FLR_DVO_OUTPUT_Y_ORDER_E : int {
+			FLR_DVO_YFIRST = 0,
+			FLR_DVO_YLAST = 1,
+			FLR_DVO_OUTPUT_Y_ORDER_END = 2,
+		}
+		
+		public enum FLR_DVO_OUTPUT_RGB_ORDER_E : int {
+			FLR_DVO_ORDER_RGB = 0,
+			FLR_DVO_ORDER_BGR = 1,
+			FLR_DVO_OUTPUT_RGB_ORDER_END = 2,
+		}
+		
+		public enum FLR_DVO_TYPE_E : int {
+			FLR_DVO_TYPE_MONO16 = 0,
+			FLR_DVO_TYPE_MONO8 = 1,
+			FLR_DVO_TYPE_COLOR = 2,
+			FLR_DVO_TYPE_ANALOG = 3,
+			FLR_DVO_TYPE_END = 4,
+		}
+		
+		public enum FLR_DVO_DISPLAY_MODE_E : int {
+			FLR_DVO_CONTINUOUS = 0,
+			FLR_DVO_ONE_SHOT = 1,
+			FLR_DVO_DISPLAY_MODE_END = 2,
+		}
+		
+		public enum FLR_DVO_VIDEO_STANDARD_E : int {
+			FLR_DVO_NTSC = 0,
+			FLR_DVO_PAL = 1,
+			FLR_DVO_VIDEO_STANDARD_END = 2,
+		}
+		
+		public enum FLR_DVO_LCD_CONFIG_ID_E : int {
+			FLR_DVO_DEFAULT = 0,
+			FLR_DVO_CUSTOM1 = 1,
+			FLR_DVO_CUSTOM2 = 2,
+			FLR_DVO_CONFIG1 = 3,
+			FLR_DVO_CONFIG2 = 4,
+		}
+		
+		public enum FLR_CAPTURE_SRC_E : int {
+			FLR_CAPTURE_SRC_NUC = 1,
+			FLR_CAPTURE_SRC_RESERVED = 2,
+			FLR_CAPTURE_SRC_TNF = 3,
+			FLR_CAPTURE_SRC_BLEND = 4,
+			FLR_CAPTURE_SRC_VIS = 5,
+			FLR_CAPTURE_SRC_MSX = 6,
+			FLR_CAPTURE_SRC_END = 7,
+		}
+		
+		public enum FLR_CAPTURE_FILE_TYPE_E : int {
+			FLR_CAPTURE_NONE = 0,
+			FLR_CAPTURE_JPEG = 1,
+			FLR_CAPTURE_PNG = 2,
+		}
+		
+		public enum FLR_AGC_MODE_E : int {
+			FLR_AGC_MODE_NORMAL = 0,
+			FLR_AGC_MODE_HOLD = 1,
+			FLR_AGC_MODE_THRESHOLD = 2,
+			FLR_AGC_MODE_END = 3,
+		}
+		
+		public enum FLR_TF_MOTION_MODE_E : int {
+			FLR_TF_MOTION_MODE_FRAME_BASED = 0,
+			FLR_TF_MOTION_MODE_MOTION_BASED = 1,
+			FLR_TF_MOTION_MODE_END = 2,
+		}
+		
+		public enum FLR_MEM_LOCATION_E : int {
+			FLR_MEM_INVALID = 0,
+			FLR_MEM_BOOTLOADER = 1,
+			FLR_MEM_UPGRADE_APP = 2,
+			FLR_MEM_LENS_NVFFC = 3,
+			FLR_MEM_LENS_SFFC = 4,
+			FLR_MEM_LENS_GAIN = 5,
+			FLR_MEM_LENS_DISTORTION = 6,
+			FLR_MEM_USER_SPACE = 7,
+			FLR_MEM_RUN_CMDS = 8,
+			FLR_MEM_JFFS2 = 9,
+			FLR_MEM_LAST = 10,
+		}
+		
+		public enum FLR_COLORLUT_ID_E : int {
+			FLR_COLORLUT_0 = 0,
+			FLR_COLORLUT_DEFAULT = 0,
+			FLR_COLORLUT_WHITEHOT = 0,
+			FLR_COLORLUT_1 = 1,
+			FLR_COLORLUT_BLACKHOT = 1,
+			FLR_COLORLUT_2 = 2,
+			FLR_COLORLUT_RAINBOW = 2,
+			FLR_COLORLUT_3 = 3,
+			FLR_COLORLUT_RAINBOW_HC = 3,
+			FLR_COLORLUT_4 = 4,
+			FLR_COLORLUT_IRONBOW = 4,
+			FLR_COLORLUT_5 = 5,
+			FLR_COLORLUT_LAVA = 5,
+			FLR_COLORLUT_6 = 6,
+			FLR_COLORLUT_ARCTIC = 6,
+			FLR_COLORLUT_7 = 7,
+			FLR_COLORLUT_GLOBOW = 7,
+			FLR_COLORLUT_8 = 8,
+			FLR_COLORLUT_GRADEDFIRE = 8,
+			FLR_COLORLUT_9 = 9,
+			FLR_COLORLUT_HOTTEST = 9,
+			FLR_COLORLUT_ID_END = 10,
+		}
+		
+		public enum FLR_SPNR_STATE_E : int {
+			FLR_SPNR_READY = 0,
+			FLR_SPNR_DESIRED = 1,
+			FLR_SPNR_IN_PROGRESS = 2,
+			FLR_SPNR_COMPLETE = 3,
+		}
+		
+		public enum FLR_SPNR_ONESHOT_STATE_E : int {
+			FLR_SPNR_ONE_SHOT_READY = 0,
+			FLR_SPNR_ONE_SHOT_EXECUTE = 1,
+			FLR_SPNR_ONE_SHOT_RESET = 2,
+			FLR_SPNR_ONE_SHOT_INIT = 3,
+			FLR_SPNR_ONE_SHOT_ABORT = 4,
+		}
+		
+		public enum FLR_TESTRAMP_TYPE_E : int {
+			FLR_TESTRAMP_ZERO = 0,
+			FLR_TESTRAMP_INCREMENTING = 1,
+			FLR_TESTRAMP_VERT_SHADE = 2,
+			FLR_TESTRAMP_HORIZ_SHADE = 3,
+			FLR_TESTRAMP_BIG_VERT_SHADE = 4,
+			FLR_TESTRAMP_SIMPLE_VERTICAL = 5,
+			FLR_TESTRAMP_VTST_CHECKERBOARD = 6,
+			FLR_TESTRAMP_VTST_DIAGONAL_STRIPE = 7,
+			FLR_TESTRAMP_VTST_MOVING_LINE_BLACK = 8,
+			FLR_TESTRAMP_VTST_DIAGONAL_LR = 9,
+			FLR_TESTRAMP_VTST_DIAGONAL_RL = 10,
+			FLR_TESTRAMP_TYPE_LAST = 11,
+		}
+		
+		public enum FLR_SYMBOLOGY_TEXT_ALIGNMENT_E : short {
+			FLR_SYMBOLOGY_LEFT_TOP = 17,
+			FLR_SYMBOLOGY_CENTER_TOP = 18,
+			FLR_SYMBOLOGY_RIGHT_TOP = 19,
+			FLR_SYMBOLOGY_LEFT_MIDDLE = 33,
+			FLR_SYMBOLOGY_CENTER_MIDDLE = 34,
+			FLR_SYMBOLOGY_RIGHT_MIDDLE = 35,
+			FLR_SYMBOLOGY_LEFT_BOTTOM = 49,
+			FLR_SYMBOLOGY_CENTER_BOTTOM = 50,
+			FLR_SYMBOLOGY_RIGHT_BOTTOM = 51,
+			FLR_SYMBOLOGY_ALIGNMENT_LAST = 64,
+		}
+		
+		public enum FLR_SYMBOLOGY_TRANSFORMATION_E : short {
+			FLR_SYMBOLOGY_TRANSFORMATION_NONE = 0,
+			FLR_SYMBOLOGY_TRANSFORMATION_FLIP_BOTH = 1,
+			FLR_SYMBOLOGY_TRANSFORMATION_FLIP_HORIZONTAL = 2,
+			FLR_SYMBOLOGY_TRANSFORMATION_FLIP_VERTICAL = 3,
+		}
+		
+		public enum FLR_SYMBOLOGY_IMAGE_TYPE_E : short {
+			FLR_SYMBOLOGY_RAW_IMAGE = 0,
+			FLR_SYMBOLOGY_PNG_IMAGE = 1,
+			FLR_SYMBOLOGY_JPEG_IMAGE = 2,
+			FLR_SYMBOLOGY_BMP_IMAGE = 3,
+		}
+		
+		public enum FLR_SYMBOLOGY_SCALING_MODE_E : short {
+			FLR_SYMBOLOGY_SCALING_MODE_NONE = 0,
+			FLR_SYMBOLOGY_SCALING_MODE_FIT = 1,
+			FLR_SYMBOLOGY_SCALING_MODE_CROP = 2,
+			FLR_SYMBOLOGY_SCALING_MODE_FILL = 3,
+		}
+		
+		public enum FLR_JFFS2_STATE_E : int {
+			FLR_JFFS2_INITIAL = 0,
+			FLR_JFFS2_CONFIGURED = 1,
+			FLR_JFFS2_MOUNTING = 2,
+			FLR_JFFS2_MOUNTED = 3,
+			FLR_JFFS2_UNMOUNTING = 4,
+			FLR_JFFS2_UNMOUNTED = 5,
+			FLR_JFFS2_FAILED_MOUNT = 6,
+			FLR_JFFS2_FAILED_UNMOUNT = 7,
+			FLR_JFFS2_FAILED_CONFIG = 8,
+			FLR_JFFS2_DISABLED = 9,
+			FLR_JFFS2_STATE_END = 10,
+		}
+		
+		public enum FLR_SPLASHSCREEN_FILETYPE_E : int {
+			FLR_SPLASHSCREEN_PNG = 0,
+			FLR_SPLASHSCREEN_BMP = 1,
+			FLR_SPLASHSCREEN_RAW = 2,
+			FLR_SPLASHSCREEN_NONE = 3,
+			FLR_SPLASHSCREEN_FILE_END = 4,
+		}
+		
+		public enum FLR_SYSTEMSYMBOLS_SYMBOL_E : int {
+			FLR_SYSTEMSYMBOLS_FFC_IMMINENT = 0,
+			FLR_SYSTEMSYMBOLS_FFC_DESIRED = 1,
+			FLR_SYSTEMSYMBOLS_TABLE_SWITCH_DESIRED = 2,
+			FLR_SYSTEMSYMBOLS_LOW_GAIN = 3,
+			FLR_SYSTEMSYMBOLS_OVERTEMP = 4,
+			FLR_SYSTEMSYMBOLS_SYMBOL_LAST = 5,
+		}
+		
+		public enum FLR_SYSTEMSYMBOLS_ID_TYPE_E : int {
+			FLR_SYSTEMSYMBOLS_ELEMENT = 0,
+			FLR_SYSTEMSYMBOLS_GROUP = 1,
+			FLR_SYSTEMSYMBOLS_ID_LAST = 2,
+		}
+		
+		public enum FLR_SYSTEMSYMBOLS_STATE_E : int {
+			FLR_SYSTEMSYMBOLS_ENTERED = 0,
+			FLR_SYSTEMSYMBOLS_EXITED = 1,
+			FLR_SYSTEMSYMBOLS_STATE_LAST = 2,
+		}
+		
+	} //End partial class Camera
+} //End namespace Boson

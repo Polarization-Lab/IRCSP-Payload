@@ -1,0 +1,8 @@
+
+BLOCKED FILE ALERT
+
+A file has been blocked due to the 'Blocked files by FLIR' rule.
+Context: 'do_build.bat'
+Disallowed due to filename
+Ticket Number: '1540-5bed-e567-0001'
+For further information, contact your system administrator. Copyright 1999-2014 McAfee, Inc.All Rights Reserved.http://www.mcafee.com

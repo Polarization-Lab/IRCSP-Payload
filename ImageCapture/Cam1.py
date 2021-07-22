@@ -5,7 +5,7 @@ This defines the class Camera1
 Requires Boson SDK
 @author: khart
 """
-from BosonSDK.ClientFiles_Python import Client_API as pyClient
+from Boson1.ClientFiles_Python import Client_API as pyClient
 
 class Camera1:
         def __init__(self,port) :

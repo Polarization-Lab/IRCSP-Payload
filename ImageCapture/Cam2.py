@@ -7,7 +7,7 @@ Requires Boson SDK
 @author: khart
 """
 
-from BosonSDKCopy.ClientFiles_Python import Client_API as pyClient2
+from Boson2.ClientFiles_Python import Client_API as pyClient2
 
 class Camera2:
         def __init__(self,port) :

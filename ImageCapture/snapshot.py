@@ -210,6 +210,8 @@ def take_image(avg):
         
         """Call image bytes from buffer"""
         #create np array of uint8 type
+        image8b_1  = np.zeros((pixRows,2*pixCols),dtype = np.uint8,order='C')
+        image8b_2  = np.zeros((pixRows,2*pixCols),dtype = np.uint8,order='C')
         image16b_1 = np.zeros((pixRows,pixCols),dtype = np.uint16,order='C')
         image16b_2 = np.zeros((pixRows,pixCols),dtype = np.uint16,order='C')
         bytesPerRead = 160

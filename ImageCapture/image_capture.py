@@ -32,36 +32,36 @@ def take_image(filename):
     now = datetime.datetime.now()
     OS_time = now.strftime("%H:%M")
 
-    #camera1 = Boson(port='/dev/ttyACM0')
-    #camera2 = Boson(port='COM6')
-
-    #print(camera1.find_video_device())
-    #print(camera2.find_video_device())
+    camera1 = Boson(port='COM5')
+    camera2 = Boson(port='COM6')
 
     #set FFC to manual
-    #camera1.set_ffc_manual()
-    #camera2.set_ffc_manual()
+    camera1.set_ffc_manual()
+    camera2.set_ffc_manual()
 
     #get FPA temperature
-    #temp1 = camera1.get_fpa_temperature()
-    #temp2 = camera2.get_fpa_temperature()
+    temp1 = camera1.get_fpa_temperature()
+    temp2 = camera2.get_fpa_temperature()
 
     #Take Image
-    #image1 = camera1.grab(device_id = 1)
-    #image2 = camera2.grab(device_id = 2)
+    image1 = camera1.grab(device_id = 1)
+    image2 = camera2.grab(device_id = 2)
+    
+    print(image1)
+    print(temp1)
 
 
     #Close Camera
-    #camera1.close()
-    #camera2.close()
+    camera1.close()
+    camera2.close()
 
     # Open as Read-Write ("a" - creates file if doesn't exist)
     with h5py.File(filename, "a") as h5:
         h5.attrs["OS_time"] = OS_time
-        #h5["image1"] = image1
-        #h5["image2"] = image2
-        #h5["temp1"] = temp1
-        #h5["temp2"] = temp2
+        h5["image1"] = image1
+        h5["image2"] = image2
+        h5["temp1"] = temp1
+        h5["temp2"] = temp2
 
 
     #Time/Speed Test - Finish

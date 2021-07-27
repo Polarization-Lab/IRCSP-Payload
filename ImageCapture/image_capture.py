@@ -89,11 +89,20 @@ def main():
     print("Directory Path %r: \n" % (cwd))
     print("List of File Names: %s \n" % (directory))
 
+    #Check Destination Directory (cwd)
+    path = '/mnt/sdcard/image_data'
+    directory = os.listdir(path)
+    
+    print()
+    print("Directory Path %r : \n" % (path))
+    print("List of File Names: %s \n" % (directory))
+    
+    
     #File Name - Control Variable
     count = 0
     #Set to work on .hdf5 file type extension.
     filename = "Capture" + str(count) + ".hdf5"
-
+    
     #Increments File Name, If File Already Exist!
     while filename in directory:
         count+=1
@@ -102,15 +111,8 @@ def main():
         #Creates New File with next available value!
         while filename not in directory:
             filename = "Capture" + str(count) + ".hdf5"
-            take_image(filename)
+            print(filename)
             count += 1
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':

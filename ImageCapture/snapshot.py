@@ -7,16 +7,15 @@ from Boson1.ClientFiles_Python import Client_API as pyClient
 from Boson2.ClientFiles_Python import Client_API as pyClient2
 import numpy as np
 import sys
-import time
 from Cam1 import Camera1
 from Cam2 import Camera2
+import os, datetime, time, h5py
 
-
-def take_image(avg):
+def take_image(filename, avg = 5, wait = 10):
    
      
-    cam1 = Camera1("COM5")
-    cam2 = Camera2("COM6")
+    cam1 = Camera1('/dev/ttyACM0')
+    cam2 = Camera2('/dev/ttyACM1')
 
     try:
         cam1.make_port(cam1.port)
@@ -43,7 +42,7 @@ def take_image(avg):
     
     #NUC filters
     #   Filters that are not configurable here: FFC, temperature Correction, SFFC
-    gain = False
+    gain = True
     bpr = False
     
     #Spatial and Temporal Filtering
@@ -144,8 +143,8 @@ def take_image(avg):
     """
     
     startAll = time.perf_counter()
-    loopsToRun =    avg
-    secondsToWait = 10
+    loopsToRun    =    avg
+    secondsToWait = wait
     
     
     fpaTempCorr1 = np.zeros((loopsToRun,2))
@@ -272,6 +271,7 @@ def take_image(avg):
         end = time.perf_counter()
         print(str(round(end-start)) + " seconds to run one loop")
         
+        
         if n == loopsToRun-1: #if on last loop, exit before wait time
             break;
         
@@ -279,14 +279,29 @@ def take_image(avg):
         time.sleep(secondsToWait-(end-start)) #wait for specified time, subtracting time for loop to run
     
     
-    
-    
+    #Time/Speed Test - Finish
+    finish = datetime.datetime.now()
+    print("Image Capture File: ", filename," created in " , finish - start)
+
     
     """data to return"""
     
     fpaTempCorr1 = np.mean(fpaTempCorr1[:,1]/10)
     fpaTempCorr2 = np.mean(fpaTempCorr2[:,1]/10)
-               
+    
+    # Open as Read-Write ("a" - creates file if doesn't exist)
+    with h5py.File(filename, "a") as h5:
+        h5.attrs["OS_time"] = finish
+        h5["image1"] = image1
+        h5["image2"] = image2
+        h5["temp1"] =  fpaTempCorr1
+        h5["temp2"] =  fpaTempCorr2
+
+
+    #Adjust Sleep for File Creation Rate - (File/Seconds)
+    time.sleep(wait)
+              
+    
     """REMOVE MASTER SLAVE"""
     
     cam1.disable_sync()
@@ -298,4 +313,48 @@ def take_image(avg):
     cam1.close_port()
     cam2.close_port()
     
-    return( fpaTempCorr1, fpaTempCorr2,image1 , image2)
+    
+#==========================================================
+def main():
+    '''
+    Main function currently executes a print statement which shows files in the current working directory.
+    Utilized for cross-reference to ensure HDF5 file exist in the same directory as python program.
+    The function checks if the file name already exist and will increment the file naming count variable
+    until the next available file name is found. Once the next available name is found, the program will
+    continue to execute the image capture function and create a new HDF5 file with the next most available
+    file name.
+    '''
+
+    #Check Current Working Directory (cwd)
+    cwd = os.getcwd()
+    directory = os.listdir(cwd)
+
+    #Check Destination Directory (path)
+    path = '/home/mount/image_data'
+    directory = os.listdir(path)
+    
+    print()
+    print("Directory Path %r : \n" % (path))
+    print("List of File Names: %s \n" % (directory))
+    
+    
+    #File Name - Control Variable
+    count = 0
+    #Set to work on .hdf5 file type extension.
+    name = "Capture" + str(count) + ".hdf5"
+    
+    #Increments File Name, If File Already Exist!
+    while name in directory:
+        count+=1
+        name = "Capture" + str(count) + ".hdf5"
+    else:
+        #Creates New File with next available value!
+        while name not in directory:
+            name = "Capture" + str(count) + ".hdf5"
+            filename = os.path.join(path,name)
+            take_image(filename)
+            count += 1
+
+
+if __name__ == '__main__':
+    main()

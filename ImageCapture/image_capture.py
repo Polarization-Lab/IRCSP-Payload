@@ -31,7 +31,7 @@ def take_image(filename):
     #Create Timestamp for File Creation Tracking
     try:
         now = datetime.datetime.now()
-        OS_time = now.strftime("%H:%M")
+        OS_time = now.strftime("%H:%M:%S")
 
         camera1 = Boson(port='/dev/ttyACM0')
         camera2 = Boson(port='/dev/ttyACM1')
@@ -95,7 +95,7 @@ def main():
     directory = os.listdir(cwd)
 
     #Check Destination Directory (path)
-    path = cwd#'/mnt/sdcard/image_data/'
+    path = '/mnt/sdcard/image_data/'
     directory = os.listdir(path)
     
     print()

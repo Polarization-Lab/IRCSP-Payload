@@ -13,7 +13,7 @@ order to create a tracking system for each file created during the flight missio
 '''
 
 import os, datetime, time, h5py
-#from flirpy.camera.boson import Boson
+from flirpy.camera.boson import Boson
 
 
 def take_image(filename):
@@ -29,55 +29,46 @@ def take_image(filename):
     start = datetime.datetime.now()
 
     #Create Timestamp for File Creation Tracking
-    try:
-        now = datetime.datetime.now()
-        OS_time = now.strftime("%H:%M")
+    now = datetime.datetime.now()
+    OS_time = now.strftime("%H:%M")
 
-        camera1 = Boson(port='/dev/ttyACM0')
-        camera2 = Boson(port='/dev/ttyACM1')
+    camera1 = Boson(port='/dev/ttyACM0')
+    camera2 = Boson(port='/dev/ttyACM1')
 
-        #set FFC to manual
-        camera1.set_ffc_manual()
-        camera2.set_ffc_manual()
+    #set FFC to manual
+    camera1.set_ffc_manual()
+    camera2.set_ffc_manual()
 
-        #get FPA temperature
-        temp1 = camera1.get_fpa_temperature()
-        temp2 = camera2.get_fpa_temperature()
-        print(temp1)
-        print(temp2)
+    #get FPA temperature
+    temp1 = camera1.get_fpa_temperature()
+    temp2 = camera2.get_fpa_temperature()
+    print(temp1)
+    print(temp2)
 
-        #Take Image
-        image1 = camera1.grab(device_id = 0)
-        image2 = camera2.grab(device_id = 1)
-
-    except:
-        print('error in image aquisition')
-        #Close Camera
-        camera1.close()
-        camera2.close()
-        time.sleep(5)
-    
-    finally:
-        # Open as Read-Write ("a" - creates file if doesn't exist)
-        with h5py.File(filename, "a") as h5:
-            h5.attrs["OS_time"] = OS_time
-            h5["image1"] = image1
-            h5["image2"] = image2
-            h5["temp1"] = temp1
-            h5["temp2"] = temp2
+    #Take Image
+    image1 = camera1.grab(device_id = 0)
+    image2 = camera2.grab(device_id = 1)
 
 
-        #Close Camera
-        camera1.close()
-        camera2.close()
+    #Close Camera
+    camera1.close()
+    camera2.close()
+
+    # Open as Read-Write ("a" - creates file if doesn't exist)
+    with h5py.File(filename, "a") as h5:
+        h5.attrs["OS_time"] = OS_time
+        h5["image1"] = image1
+        h5["image2"] = image2
+        h5["temp1"] = temp1
+        h5["temp2"] = temp2
 
 
-        #Time/Speed Test - Finish
-        finish = datetime.datetime.now()
-        print("Image Capture File: ", filename," created in " , finish - start)
+    #Time/Speed Test - Finish
+    finish = datetime.datetime.now()
+    print("Image Capture File: ", filename," created in " , finish - start)
 
-        #Adjust Sleep for File Creation Rate - (File/Seconds)
-        time.sleep(10)
+    #Adjust Sleep for File Creation Rate - (File/Seconds)
+    time.sleep(10)
 
 #==========================================================
 def main():
@@ -95,7 +86,7 @@ def main():
     directory = os.listdir(cwd)
 
     #Check Destination Directory (path)
-    path = cwd#'/mnt/sdcard/image_data/'
+    path = '/mnt/sdcard/image_data/'
     directory = os.listdir(path)
     
     print()

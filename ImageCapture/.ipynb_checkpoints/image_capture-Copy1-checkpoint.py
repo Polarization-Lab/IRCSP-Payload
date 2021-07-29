@@ -13,8 +13,7 @@ order to create a tracking system for each file created during the flight missio
 '''
 
 import os, datetime, time, h5py
-#from flirpy.camera.boson import Boson
-
+from random import random
 
 def take_image(filename):
     """take_image: The function will create a Operating System timestamp variable (OS_time), configure
@@ -30,46 +29,18 @@ def take_image(filename):
 
     #Create Timestamp for File Creation Tracking
     try:
-        now = datetime.datetime.now()
-        OS_time = now.strftime("%H:%M")
+        results = round(random())
+        10/results
 
-        camera1 = Boson(port='/dev/ttyACM0')
-        camera2 = Boson(port='/dev/ttyACM1')
-
-        #set FFC to manual
-        camera1.set_ffc_manual()
-        camera2.set_ffc_manual()
-
-        #get FPA temperature
-        temp1 = camera1.get_fpa_temperature()
-        temp2 = camera2.get_fpa_temperature()
-        print(temp1)
-        print(temp2)
-
-        #Take Image
-        image1 = camera1.grab(device_id = 0)
-        image2 = camera2.grab(device_id = 1)
-
-    except:
+    else:
         print('error in image aquisition')
         #Close Camera
-        camera1.close()
-        camera2.close()
+        print('closing')
         time.sleep(5)
     
     finally:
         # Open as Read-Write ("a" - creates file if doesn't exist)
-        with h5py.File(filename, "a") as h5:
-            h5.attrs["OS_time"] = OS_time
-            h5["image1"] = image1
-            h5["image2"] = image2
-            h5["temp1"] = temp1
-            h5["temp2"] = temp2
-
-
-        #Close Camera
-        camera1.close()
-        camera2.close()
+        print("you did it!")
 
 
         #Time/Speed Test - Finish
@@ -95,7 +66,7 @@ def main():
     directory = os.listdir(cwd)
 
     #Check Destination Directory (path)
-    path = cwd#'/mnt/sdcard/image_data/'
+    path = '/mnt/sdcard/image_data/'
     directory = os.listdir(path)
     
     print()

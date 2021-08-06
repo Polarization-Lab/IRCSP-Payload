@@ -12,6 +12,9 @@
 		E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E85526BC851900929022 /* IRCSP.cpp */; };
 		E3A8E86B26BDD2E900929022 /* Accelerometer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */; };
 		E3A8E87126BDD77600929022 /* TEC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E86F26BDD77600929022 /* TEC.cpp */; };
+		E3A8E87426BDED7300929022 /* Boson.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E87226BDED7300929022 /* Boson.cpp */; };
+		E3A8E87726BDEE2D00929022 /* bytes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E87526BDEE2D00929022 /* bytes.cpp */; };
+		E3A8E87A26BDEE7400929022 /* serial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E87826BDEE7400929022 /* serial.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +41,12 @@
 		E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Accelerometer.cpp; sourceTree = "<group>"; };
 		E3A8E86F26BDD77600929022 /* TEC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TEC.cpp; sourceTree = "<group>"; };
 		E3A8E87026BDD77600929022 /* TEC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TEC.hpp; sourceTree = "<group>"; };
+		E3A8E87226BDED7300929022 /* Boson.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Boson.cpp; sourceTree = "<group>"; };
+		E3A8E87326BDED7300929022 /* Boson.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Boson.hpp; sourceTree = "<group>"; };
+		E3A8E87526BDEE2D00929022 /* bytes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bytes.cpp; sourceTree = "<group>"; };
+		E3A8E87626BDEE2D00929022 /* bytes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bytes.hpp; sourceTree = "<group>"; };
+		E3A8E87826BDEE7400929022 /* serial.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = serial.cpp; sourceTree = "<group>"; };
+		E3A8E87926BDEE7400929022 /* serial.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = serial.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +79,12 @@
 		E3A8E82E26BB25D400929022 /* IRCSP-Payload */ = {
 			isa = PBXGroup;
 			children = (
+				E3A8E87526BDEE2D00929022 /* bytes.cpp */,
+				E3A8E87626BDEE2D00929022 /* bytes.hpp */,
+				E3A8E87826BDEE7400929022 /* serial.cpp */,
+				E3A8E87926BDEE7400929022 /* serial.hpp */,
+				E3A8E87226BDED7300929022 /* Boson.cpp */,
+				E3A8E87326BDED7300929022 /* Boson.hpp */,
 				E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */,
 				E3A8E82F26BB25D400929022 /* main.cpp */,
 				E3A8E85826BDA56800929022 /* Accelerometer.h */,
@@ -143,6 +158,9 @@
 				E3A8E85426BC7FF700929022 /* ConcreteIRCSPStates.cpp in Sources */,
 				E3A8E86B26BDD2E900929022 /* Accelerometer.cpp in Sources */,
 				E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */,
+				E3A8E87A26BDEE7400929022 /* serial.cpp in Sources */,
+				E3A8E87426BDED7300929022 /* Boson.cpp in Sources */,
+				E3A8E87726BDEE2D00929022 /* bytes.cpp in Sources */,
 				E3A8E83026BB25D400929022 /* main.cpp in Sources */,
 				E3A8E87126BDD77600929022 /* TEC.cpp in Sources */,
 			);

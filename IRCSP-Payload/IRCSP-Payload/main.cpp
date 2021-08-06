@@ -16,6 +16,8 @@
 #include <termios.h>
 #include <iostream>
 #include <stdexcept>
+#include <Python/Python.h>
+
 
 
 #include "IRCSP.h"
@@ -39,6 +41,9 @@ int main(void)
     IRCSP ircsp;
     Accelerometer accelerometer;
     TEC tec;
+    
+    //Other Main funct. variables
+    int childPid, childStatus;
 
     
     for(int i = 0; i<20; i++)
@@ -69,13 +74,12 @@ int main(void)
                     std::cout<< "Acceleration =  " << ircsp.acceleration << " G \n";
                     sbcState = takeoff;
                     ircsp.toggle();
-                    sleep(1);
+                    
                 }
             }
                 
             case takeoff:
             {
-                
                 //SWITCH CONDITION
                 if (ircsp.acceleration < ircsp.CRUISE_ACCEL)
                 {
@@ -111,7 +115,7 @@ int main(void)
             }
                 
             case shutdown:
-            {ircsp.check_telemetry(bootTime,accelerometer,tec);
+            {//ircsp.check_telemetry(bootTime,accelerometer,tec);
             }
         }
     }

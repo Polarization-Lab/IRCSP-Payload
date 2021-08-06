@@ -23,8 +23,8 @@ Accelerometer::Accelerometer(int twifd) {
 void Accelerometer::getAcceleration() {
     float a = 0;
     for (int i = 0; i < 3; i++) {
-        gValues[i] = 1;
-        a + pow(1,2);
+        gValues[i] = rand();
+        a = a + pow(1,2);
     total_accel = sqrt(a);
     }
 

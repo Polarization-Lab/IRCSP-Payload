@@ -9,8 +9,8 @@
 
 void Boot::toggle(IRCSP* ircsp)
 {
-    if (ircsp -> time_elapsed < 10 ) {
-        // Boot -> Preflight
+    if (ircsp -> time_elapsed < ircsp->PREFLIGHT_TIME ) {
+        // Boot -> Preflight (TODO: change to check for stored data)
         ircsp->setState(Preflight::getInstance());}
     else  {
         // Boot -> Cruising
@@ -27,13 +27,8 @@ IRCSPState& Boot::getInstance()
 
 void Preflight::toggle(IRCSP* ircsp)
 {
-    if (ircsp -> acceleration < 1.25) {
-        // Preflight -> Preflight
-        ircsp->setState(Preflight::getInstance());}
-    else  {
-        // Preflight -> Takeoff
-        ircsp->setState(Takeoff::getInstance());}
-         
+     // Preflight -> Takeoff
+    ircsp->setState(Takeoff::getInstance());
 }
 
 IRCSPState& Preflight::getInstance()
@@ -42,14 +37,15 @@ IRCSPState& Preflight::getInstance()
     return singleton;
 }
 
+
 void Takeoff::toggle(IRCSP* ircsp)
 {
-    if (ircsp-> acceleration < 1.25) {
+    if (ircsp-> acceleration < ircsp-> CRUISE_ACCEL) {
         // Takeoff -> Crusing
         ircsp->setState(Cruising::getInstance());}
     else  {
         // Takeoff -> Shutdown
-        ircsp->setState(Takeoff::getInstance());}
+        ircsp->setState(Shutdown::getInstance());}
          
 }
 IRCSPState& Takeoff::getInstance()
@@ -61,7 +57,7 @@ IRCSPState& Takeoff::getInstance()
 void Cruising::toggle(IRCSP* ircsp)
 { 
     // Cruising -> Shutdown
-    ircsp->setState(Shutdown::getInstance());
+    ircsp->setState(Falling::getInstance());
 }
 
 IRCSPState& Cruising::getInstance()
@@ -69,6 +65,19 @@ IRCSPState& Cruising::getInstance()
     static Cruising singleton;
     return singleton;
 }
+
+void Falling::toggle(IRCSP* ircsp)
+{
+    // Falling -> Shutdown
+    ircsp->setState(Shutdown::getInstance());
+}
+
+IRCSPState& Falling::getInstance()
+{
+    static Falling singleton;
+    return singleton;
+}
+
 
 void Shutdown::toggle(IRCSP* ircsp)
 {

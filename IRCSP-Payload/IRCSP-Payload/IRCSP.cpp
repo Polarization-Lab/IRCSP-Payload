@@ -8,6 +8,8 @@
 #include "IRCSP.h"
 #include "ConcreteIRCSPStates.h"
 
+//#include "Accelerometer.h"
+
 IRCSP::IRCSP()
 {
     // All lights are initially turned off
@@ -35,4 +37,11 @@ void IRCSP::check_telemetry (long bootTime)
     t_ircsp = 1;
     dataspace =1;
 }
+
+void IRCSP::set_PID (long temp)
+{
+    PID_target = temp;
+    //TODO: add function setting PID parameteres
+}
+
 

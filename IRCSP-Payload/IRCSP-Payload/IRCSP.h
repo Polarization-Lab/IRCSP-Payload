@@ -6,7 +6,9 @@
 //
 
 #pragma once
-#include "IRCSPState.h"
+#include "IRCSP.h"
+#include "ConcreteIRCSPStates.h"
+
 #include <stdio.h>
 #include <time.h>
 
@@ -22,8 +24,17 @@ public:
     float t_sbc;
     float t_ircsp;
     float dataspace;
+    float PID_target;
+    
+    //State switching parameters
+    float TAKEOFF_ACCEL = 1.2;
+    float DECENT_ACCEL = 3;
+    float CRUISE_ACCEL = 1.1;
+    float PREFLIGHT_TIME = 10;
+    float MIN_DATASPACE  = 1;
     
     void check_telemetry(long);
+    void set_PID(long);
     
     //State Functions
     IRCSP();
@@ -34,4 +45,9 @@ public:
 private:
     // IRCSPState here is now a class
     IRCSPState* currentState;
+    
+    
 };
+
+
+

@@ -21,20 +21,22 @@
 #include <iostream>
 #include <stdexcept>
 
-typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, shutdown } SBCstate; //SBC states
+typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, falling, shutdown } SBCstate; //SBC states
+
+// -----GLOBAL VARIABLES---------
 
 int main(void)
 {
     //Record Start Time
-    long bootTime = time(NULL), currentTime, lastAccelCheck = bootTime; // stores epoch time;
+    long bootTime = time(NULL),  lastAccelCheck = bootTime; // stores epoch time;
     
     //Assign volatile memory
-    volatile SBCstate lastState, sbcState = boot;
+    volatile SBCstate  sbcState = boot;
     
     //Generate IRCSP Class object
     IRCSP ircsp;
     
-    for(int i = 0; i<10; i++)
+    for(int i = 0; i<20; i++)
     {
         switch (sbcState) //state handler
         {
@@ -54,11 +56,12 @@ int main(void)
             case preflight:
             {
                 ircsp.check_telemetry(bootTime);
-               
-                std::cout<< "Time elapsed since boot " << ircsp.time_elapsed << " s \n";
                 ircsp.acceleration = 1.5;
-                if (ircsp.time_elapsed > 10 or ircsp.acceleration > 1.25 )
+                
+                //SWITCH CONDITION
+                if (ircsp.time_elapsed > ircsp.PREFLIGHT_TIME or ircsp.acceleration > ircsp.TAKEOFF_ACCEL )
                 {
+                    std::cout<< "Acceleration =  " << ircsp.acceleration << " G \n";
                     sbcState = takeoff;
                     ircsp.toggle();
                     sleep(1);
@@ -67,24 +70,43 @@ int main(void)
                 
             case takeoff:
             {
-                std::cout<< "Acceleration =  " << ircsp.acceleration << " G \n";
-                if (ircsp.time_elapsed > 10 or ircsp.acceleration < 1.25 )
+                
+                //SWITCH CONDITION
+                if (ircsp.acceleration < ircsp.CRUISE_ACCEL)
                 {
                     sbcState = cruising;
                     ircsp.toggle();
-                    sleep(1);
                 }
             }
                 
             case cruising:
             {
                 ircsp.acceleration = 1;
-                if (ircsp.time_elapsed > 10 or ircsp.acceleration < 1.25 )
+                if (i >10)
+                    ircsp.acceleration = 4;
+                
+                //SWITCH CONDITION
+                if (ircsp.acceleration > ircsp.DECENT_ACCEL )
                 {
-                    sbcState = cruising;
+                    sbcState = shutdown;
                     ircsp.toggle();
-                    sleep(1);
                 }
+            }
+                
+            case falling:
+            {
+                ircsp.acceleration = 1;
+                
+                //SWITCH CONDITION
+                if (ircsp.dataspace < ircsp.MIN_DATASPACE )
+                {
+                    sbcState = shutdown;
+                    ircsp.toggle();
+                }
+            }
+                
+            case shutdown:
+            {ircsp.check_telemetry(bootTime);
             }
         }
     }

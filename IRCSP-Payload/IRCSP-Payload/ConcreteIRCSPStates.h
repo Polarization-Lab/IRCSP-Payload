@@ -57,7 +57,6 @@ class Takeoff : public IRCSPState
 public:
     void enter(IRCSP* ircsp) {
         std::cout << "Entering Takeoff State\n";
-        
     }
     void toggle(IRCSP* ircsp);
     void exit(IRCSP* ircsp) {
@@ -87,6 +86,25 @@ private:
     Cruising(const Cruising& other);
     Cruising& operator=(const Cruising& other);
 };
+
+//Falling CLASS
+class Falling : public IRCSPState
+{
+public:
+    void enter(IRCSP* ircsp) {
+        std::cout << "Instrument in Freefall \n";
+    }
+    void toggle(IRCSP* ircsp);
+    void exit(IRCSP* ircsp) {
+    }
+    static IRCSPState& getInstance();
+
+private:
+    Falling() {}
+    Falling(const Falling& other);
+    Falling& operator=(const Falling& other);
+};
+
 
 //SHUTDOWN CLASS
 class Shutdown : public IRCSPState

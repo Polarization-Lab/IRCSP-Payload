@@ -8,7 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		E3A8E83026BB25D400929022 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E82F26BB25D400929022 /* main.cpp */; };
-		E3A8E84026BB2A1C00929022 /* Adafruit_BME280.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E83F26BB2A1C00929022 /* Adafruit_BME280.cpp */; };
+		E3A8E85426BC7FF700929022 /* ConcreteIRCSPStates.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */; };
+		E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E85526BC851900929022 /* IRCSP.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,9 +27,11 @@
 /* Begin PBXFileReference section */
 		E3A8E82C26BB25D400929022 /* IRCSP-Payload */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "IRCSP-Payload"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3A8E82F26BB25D400929022 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		E3A8E83626BB279300929022 /* Adafruit_BME280.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = Adafruit_BME280.h; sourceTree = "<group>"; };
-		E3A8E83F26BB2A1C00929022 /* Adafruit_BME280.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Adafruit_BME280.cpp; sourceTree = "<group>"; };
-		E3A8E84126BB415500929022 /* Adafruit_Sensor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Adafruit_Sensor.h; sourceTree = "<group>"; };
+		E3A8E84226BC612300929022 /* IRCSPState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRCSPState.h; sourceTree = "<group>"; };
+		E3A8E84326BC613F00929022 /* IRCSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IRCSP.h; sourceTree = "<group>"; };
+		E3A8E84426BC61A700929022 /* ConcreteIRCSPStates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ConcreteIRCSPStates.h; path = "/Users/kirahart/Dropbox/GitHub/IRSCP-Payload/IRCSP-Payload/IRCSP-Payload/ConcreteIRCSPStates.h"; sourceTree = "<absolute>"; };
+		E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConcreteIRCSPStates.cpp; sourceTree = "<group>"; };
+		E3A8E85526BC851900929022 /* IRCSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IRCSP.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,10 +64,12 @@
 		E3A8E82E26BB25D400929022 /* IRCSP-Payload */ = {
 			isa = PBXGroup;
 			children = (
+				E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */,
 				E3A8E82F26BB25D400929022 /* main.cpp */,
-				E3A8E83F26BB2A1C00929022 /* Adafruit_BME280.cpp */,
-				E3A8E84126BB415500929022 /* Adafruit_Sensor.h */,
-				E3A8E83626BB279300929022 /* Adafruit_BME280.h */,
+				E3A8E85526BC851900929022 /* IRCSP.cpp */,
+				E3A8E84226BC612300929022 /* IRCSPState.h */,
+				E3A8E84426BC61A700929022 /* ConcreteIRCSPStates.h */,
+				E3A8E84326BC613F00929022 /* IRCSP.h */,
 			);
 			path = "IRCSP-Payload";
 			sourceTree = "<group>";
@@ -125,8 +130,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E3A8E85426BC7FF700929022 /* ConcreteIRCSPStates.cpp in Sources */,
+				E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */,
 				E3A8E83026BB25D400929022 /* main.cpp in Sources */,
-				E3A8E84026BB2A1C00929022 /* Adafruit_BME280.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

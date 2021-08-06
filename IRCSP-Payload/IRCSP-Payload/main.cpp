@@ -14,12 +14,14 @@
 //#include <linux/pci.h>
 #include <unistd.h>
 #include <termios.h>
+#include <iostream>
+#include <stdexcept>
 
 
 #include "IRCSP.h"
 #include "ConcreteIRCSPStates.h"
-#include <iostream>
-#include <stdexcept>
+
+
 
 typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, falling, shutdown } SBCstate; //SBC states
 
@@ -28,13 +30,16 @@ typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, falling, shutdo
 int main(void)
 {
     //Record Start Time
-    long bootTime = time(NULL),  lastAccelCheck = bootTime; // stores epoch time;
+    time_t bootTime = time(NULL),  lastAccelCheck = bootTime; // stores epoch time;
     
     //Assign volatile memory
     volatile SBCstate  sbcState = boot;
     
-    //Generate IRCSP Class object
+    //Generate Instrument Class Objects
     IRCSP ircsp;
+    Accelerometer accelerometer;
+    TEC tec;
+
     
     for(int i = 0; i<20; i++)
     {
@@ -55,7 +60,7 @@ int main(void)
             
             case preflight:
             {
-                ircsp.check_telemetry(bootTime);
+                ircsp.check_telemetry(bootTime,accelerometer,tec);
                 ircsp.acceleration = 1.5;
                 
                 //SWITCH CONDITION
@@ -106,7 +111,7 @@ int main(void)
             }
                 
             case shutdown:
-            {ircsp.check_telemetry(bootTime);
+            {ircsp.check_telemetry(bootTime,accelerometer,tec);
             }
         }
     }

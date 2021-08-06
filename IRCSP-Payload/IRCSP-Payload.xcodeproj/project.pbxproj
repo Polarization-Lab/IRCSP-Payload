@@ -10,6 +10,8 @@
 		E3A8E83026BB25D400929022 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E82F26BB25D400929022 /* main.cpp */; };
 		E3A8E85426BC7FF700929022 /* ConcreteIRCSPStates.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */; };
 		E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E85526BC851900929022 /* IRCSP.cpp */; };
+		E3A8E86B26BDD2E900929022 /* Accelerometer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */; };
+		E3A8E87126BDD77600929022 /* TEC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E86F26BDD77600929022 /* TEC.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,10 +34,10 @@
 		E3A8E84426BC61A700929022 /* ConcreteIRCSPStates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ConcreteIRCSPStates.h; path = "/Users/kirahart/Dropbox/GitHub/IRSCP-Payload/IRCSP-Payload/IRCSP-Payload/ConcreteIRCSPStates.h"; sourceTree = "<absolute>"; };
 		E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConcreteIRCSPStates.cpp; sourceTree = "<group>"; };
 		E3A8E85526BC851900929022 /* IRCSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IRCSP.cpp; sourceTree = "<group>"; };
-		E3A8E85726BDA52900929022 /* ADC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ADC.h; sourceTree = "<group>"; };
 		E3A8E85826BDA56800929022 /* Accelerometer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Accelerometer.h; sourceTree = "<group>"; };
-		E3A8E85A26BDA5B200929022 /* NTCThermistorDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTCThermistorDecoder.h; sourceTree = "<group>"; };
-		E3A8E86226BDA73E00929022 /* i2c-dev.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "i2c-dev.h"; sourceTree = "<group>"; };
+		E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Accelerometer.cpp; sourceTree = "<group>"; };
+		E3A8E86F26BDD77600929022 /* TEC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TEC.cpp; sourceTree = "<group>"; };
+		E3A8E87026BDD77600929022 /* TEC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TEC.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,14 +70,14 @@
 		E3A8E82E26BB25D400929022 /* IRCSP-Payload */ = {
 			isa = PBXGroup;
 			children = (
-				E3A8E86226BDA73E00929022 /* i2c-dev.h */,
 				E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */,
 				E3A8E82F26BB25D400929022 /* main.cpp */,
-				E3A8E85726BDA52900929022 /* ADC.h */,
 				E3A8E85826BDA56800929022 /* Accelerometer.h */,
+				E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */,
+				E3A8E86F26BDD77600929022 /* TEC.cpp */,
+				E3A8E87026BDD77600929022 /* TEC.hpp */,
 				E3A8E85526BC851900929022 /* IRCSP.cpp */,
 				E3A8E84226BC612300929022 /* IRCSPState.h */,
-				E3A8E85A26BDA5B200929022 /* NTCThermistorDecoder.h */,
 				E3A8E84426BC61A700929022 /* ConcreteIRCSPStates.h */,
 				E3A8E84326BC613F00929022 /* IRCSP.h */,
 			);
@@ -139,8 +141,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E3A8E85426BC7FF700929022 /* ConcreteIRCSPStates.cpp in Sources */,
+				E3A8E86B26BDD2E900929022 /* Accelerometer.cpp in Sources */,
 				E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */,
 				E3A8E83026BB25D400929022 /* main.cpp in Sources */,
+				E3A8E87126BDD77600929022 /* TEC.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

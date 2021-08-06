@@ -29,10 +29,13 @@ void IRCSP::toggle()
     currentState->toggle(this);
 }
 
-void IRCSP::check_telemetry (long bootTime)
+void IRCSP::check_telemetry (time_t bootTime, Accelerometer& accelerometer, TEC& tec )
 {
+    accelerometer.getAcceleration();
+    
+    
     time_elapsed = time(NULL) - bootTime;
-    acceleration = 1;
+    acceleration = accelerometer.total_accel;
     t_sbc = 1;
     t_ircsp = 1;
     dataspace =1;

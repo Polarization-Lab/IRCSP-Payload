@@ -8,6 +8,8 @@
 #pragma once
 #include "IRCSP.h"
 #include "ConcreteIRCSPStates.h"
+#include "Accelerometer.h"
+#include "TEC.hpp"
 
 #include <stdio.h>
 #include <time.h>
@@ -33,7 +35,7 @@ public:
     float PREFLIGHT_TIME = 10;
     float MIN_DATASPACE  = 1;
     
-    void check_telemetry(long);
+    void check_telemetry(time_t, Accelerometer&,TEC&);
     void set_PID(long);
     
     //State Functions

@@ -7,6 +7,8 @@
 
 #include "IRCSP.h"
 #include "ConcreteIRCSPStates.h"
+#include <iostream>
+#include <sstream>
 
 //#include "Accelerometer.h"
 
@@ -29,6 +31,7 @@ void IRCSP::toggle()
     currentState->toggle(this);
 }
 
+
 void IRCSP::check_telemetry (time_t bootTime, Accelerometer& accelerometer, TEC& tec )
 {
     accelerometer.getAcceleration();
@@ -36,9 +39,11 @@ void IRCSP::check_telemetry (time_t bootTime, Accelerometer& accelerometer, TEC&
     
     time_elapsed = time(NULL) - bootTime;
     acceleration = accelerometer.total_accel;
-    t_sbc = 1;
+    t_sbc = 1; // GetStdoutFromCommand("ts7800ctl -t " );
     t_ircsp = 1;
-    dataspace =1;
+    
+    //get data space
+    dataspace = GetStdoutFromCommand("du -k " + dataPath);
 }
 
 void IRCSP::set_PID (long temp)
@@ -46,5 +51,34 @@ void IRCSP::set_PID (long temp)
     PID_target = temp;
     //TODO: add function setting PID parameteres
 }
+
+int IRCSP::GetStdoutFromCommand(std::string cmd) {
+
+  std::string data;
+  FILE * stream;
+  const int max_buffer = 256;
+  char buffer[max_buffer];
+  cmd.append(" 2>&1");
+
+  stream = popen(cmd.c_str(), "r");
+  if (stream) {
+    while (!feof(stream))
+      if (fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
+    pclose(stream);
+  }
+  std::stringstream ss;
+  /* Storing the whole string into string stream */
+  ss << data;
+  std::string temp;
+  int found = 0;
+  while (!ss.eof()) {
+    ss >> temp;
+      if (std::stringstream(temp) >> found){
+        return found;
+      }
+  }
+  return found;
+}
+
 
 

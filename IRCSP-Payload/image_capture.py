@@ -71,12 +71,12 @@ def main():
     '''
 
     #Check Current Working Directory (cwd)
-    cwd = os.getcwd()
-    directory = os.listdir(cwd)
+    path = os.getcwd()
+    directory = os.listdir(path)
 
     #Check Destination Directory (path)
-    path ='/Users/kirahart/Dropbox/GitHub/IRSCP-Payload/IRCSP-Payload/data/'
-    directory = os.listdir(path)
+   # path ='/Users/kirahart/Dropbox/GitHub/IRSCP-Payload/IRCSP-Payload/data/'
+    #directory = os.listdir(path)
     
     print()
     print("Directory Path %r : \n" % (path))

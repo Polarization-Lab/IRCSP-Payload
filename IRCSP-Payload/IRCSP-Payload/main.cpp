@@ -17,7 +17,7 @@
 #include <termios.h>
 #include <iostream>
 #include <stdexcept>
-#include <Python/Python.h>
+#include<sstream>
 
 
 
@@ -28,12 +28,10 @@
 
 enum SBCstate { boot, preflight, takeoff, cruising, falling, shutdown } ; //SBC states
 
-// -----GLOBAL VARIABLES---------
-
 int main(void)
 {
     //Record Start Time
-    time_t bootTime = time(NULL), currentTime,start; // stores epoch time;
+    time_t bootTime = time(NULL), currentTime; // stores epoch time;
     
     //Initial State is BOOT, update upon state change
     SBCstate  sbcState = boot;
@@ -46,12 +44,14 @@ int main(void)
     //Gereate logging objects and files in append mode
     std::fstream log;
     std::fstream telemetry;
-    log.open ("/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/log.txt",std::fstream::app);
-    telemetry.open ("/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/telemetry.txt",std::fstream::app);
+    log.open (ircsp.logPath,std::fstream::app);
+    telemetry.open (ircsp.telemetryPath,std::fstream::app);
     
     //declare start of loop
     currentTime = time(NULL);
     log << std::ctime(&currentTime) << " Main Function Initiated \n" ;
+    log.close();
+    telemetry.close();
     
     //Get power access to USB ports
     //system("echo 45 > /sys/class/gpio/export"); //Enables software control of USB power
@@ -60,13 +60,18 @@ int main(void)
     
     //Other Main funct. variables
     int childPid , childStatus;
+    
    
     //begin time to save telemery
     time_t t;
     t = time(NULL);
-    
-    for(int i = 0; i<200; i++)
+
+
+    for(int i = 0; i<1000; i++)
+        
     {
+        log.open (ircsp.logPath,std::fstream::app);
+        telemetry.open (ircsp.telemetryPath,std::fstream::app);
         long double timeSpent =   ( time(NULL) - t ) ;
         
         if(timeSpent > ircsp.sampling){
@@ -101,6 +106,13 @@ int main(void)
                         sbcState = cruising;
                         log << std::ctime(&currentTime) << " Cruising \n";
                         //system("echo 1 > /sys/class/gpio/gpio45/value"); //turns USB power on
+                        sleep(10);
+                        
+                        if ((childPid = fork()) == 0)
+                        {
+                        std::cout << "fork at preflight \n";
+                        execlp("/Users/kirahart/opt/anaconda3/bin/python", "python","/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/image_capture.py", NULL);
+                        }
                     }
                     else{
                         sbcState = preflight;
@@ -133,38 +145,36 @@ int main(void)
                     log << std::ctime(&currentTime) << " Entering TakeOff \n"  ;
                     log << ircsp.acceleration <<" " << ircsp.t_sbc <<" " << ircsp.t_ircsp<<" " << ircsp.humidity << "\n"  ;
                     
+                    if ((childPid = fork()) == 0)
+                    {
+                    std::cout << "fork at preflight \n";
+                    execlp("/Users/kirahart/opt/anaconda3/bin/python", "python","/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/image_capture.py", NULL);
+                    }
+                    
                     
                 }
                 break;
 
                 
             case takeoff:
-                //system("echo 1 > /sys/class/gpio/gpio45/value"); //turns USB power on
-                sleep(10);
                 ircsp.check_telemetry(bootTime,accelerometer,tec);
-                
-                /*if ((childPid = fork()) == 0)
-                {
-                execlp("/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/image_capture.py","image_capture.py");
-                }
-                */
-                 
+ 
                 sbcState = takeoff;
                 //SWITCH CONDITION
-                if (ircsp.acceleration < ircsp.CRUISE_ACCEL)
+                if (ircsp.acceleration < ircsp.CRUISE_ACCEL || ircsp.dataspace > ircsp.MAX_DATA)
                 {
                     sbcState = cruising;
                     ircsp.toggle();
                     
                     log << std::ctime(&currentTime) << " Cruising \n"  ;
-                    log << ircsp.acceleration <<" " << ircsp.t_sbc <<" " << ircsp.t_ircsp<<" " << ircsp.humidity;
+                    log << ircsp.acceleration <<" " << ircsp.t_sbc <<" " << ircsp.t_ircsp<<" " << ircsp.humidity<< " \n";
                 }
                 break;
 
 
                 
             case cruising:
-                sleep(1);
+    
                 ircsp.check_telemetry(bootTime,accelerometer,tec);
                 sbcState = cruising;
                 
@@ -177,14 +187,24 @@ int main(void)
                     log << std::ctime(&currentTime) << " Falling \n"  ;
                     log << ircsp.acceleration <<" " << ircsp.t_sbc <<" " << ircsp.t_ircsp<<" " << ircsp.humidity << " \n";
                 }
+                if (ircsp.dataspace > ircsp.MAX_DATA)
+                {
+                    sbcState = shutdown;
+                    ircsp.toggle();
+                    
+                    log << std::ctime(&currentTime) << " Data Max Reached, Shutting Down \n"  ;
+                    log << ircsp.acceleration <<" " << ircsp.t_sbc <<" " << ircsp.t_ircsp<<" " << ircsp.humidity << " \n";
+                }
                 break;
 
                 
             case falling:
                 ircsp.check_telemetry(bootTime,accelerometer,tec);
                 //SWITCH CONDITION
-                if (ircsp.dataspace < ircsp.MIN_DATASPACE )
+                if (ircsp.dataspace > ircsp.MAX_DATA )
                 {
+                    log << std::ctime(&currentTime) << " Data Max Reached, Shutting Down \n"  ;
+                    log << ircsp.acceleration <<" " << ircsp.t_sbc <<" " << ircsp.t_ircsp<<" " << ircsp.humidity << " \n";
                     sbcState = shutdown;
                     ircsp.toggle();
                 }
@@ -195,10 +215,11 @@ int main(void)
                 break;
                 
         }
+        log.close();
+        telemetry.close();
     }
     
-    log.close();
-    telemetry.close();
+    
     
     
     return 0;

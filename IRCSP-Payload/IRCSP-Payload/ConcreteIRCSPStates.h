@@ -57,6 +57,7 @@ class Takeoff : public IRCSPState
 public:
     void enter(IRCSP* ircsp) {
         std::cout << "Entering Takeoff State\n";
+        
     }
     void toggle(IRCSP* ircsp);
     void exit(IRCSP* ircsp) {

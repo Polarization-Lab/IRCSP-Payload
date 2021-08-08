@@ -25,17 +25,17 @@
 
 
 
-typedef enum SBCstate_enum { boot, preflight, takeoff, cruising, falling, shutdown } SBCstate; //SBC states
+enum SBCstate { boot, preflight, takeoff, cruising, falling, shutdown } ; //SBC states
 
 // -----GLOBAL VARIABLES---------
 
 int main(void)
 {
     //Record Start Time
-    time_t bootTime = time(NULL),  lastAccelCheck = bootTime; // stores epoch time;
+    time_t bootTime = time(NULL), currentTime,  lastAccelCheck = bootTime; // stores epoch time;
     
-    //Assign volatile memory
-    volatile SBCstate  sbcState = boot;
+    //Initial State is BOOT, update upon state change
+    SBCstate  sbcState = boot;
     
     //Generate Instrument Class Objects
     IRCSP ircsp;
@@ -43,56 +43,64 @@ int main(void)
     TEC tec;
     
     //Other Main funct. variables
-    int childPid, childStatus;
-
-    
-    for(int i = 0; i<20; i++)
+    int childPid , childStatus;
+    FILE * logFile = nullptr;
+    FILE * telemetryFile;
+   
+    logFile = fopen ("/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/log.txt","w");
+    telemetryFile = fopen ("/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/telemetry.txt","w");
+    for(int i = 0; i<10; i++)
     {
+        std::cout << sbcState;
         switch (sbcState) //state handler
         {
             case boot:
-            {
-                fprintf(stderr, "Booting \n");
-                if (true && bootTime != .1)//boot check //do once while leaving
-                {
+                if (bootTime != .1)//boot check //do once while leaving
+                {   sbcState = boot;
+                    //print message to log
+                    ircsp.check_telemetry(bootTime,accelerometer,tec);
+                  
+                    //toggle to next state
                     sbcState = preflight;
                     ircsp.toggle();
                     sleep(1);
-                }
                 break;
             }
             
             
+            
             case preflight:
-            {
                 ircsp.check_telemetry(bootTime,accelerometer,tec);
-                ircsp.acceleration = 1.5;
-                
+                sbcState = preflight;
                 //SWITCH CONDITION
-                if (ircsp.time_elapsed > ircsp.PREFLIGHT_TIME or ircsp.acceleration > ircsp.TAKEOFF_ACCEL )
+                if (ircsp.time_elapsed > ircsp.PREFLIGHT_TIME || ircsp.acceleration > ircsp.TAKEOFF_ACCEL )
                 {
-                    std::cout<< "Acceleration =  " << ircsp.acceleration << " G \n";
+
                     sbcState = takeoff;
                     ircsp.toggle();
-                    
                 }
-            }
+                break;
+
                 
             case takeoff:
-            {
+                ircsp.check_telemetry(bootTime,accelerometer,tec);
+                
+                //execlp("/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/image_capture.py","image_capture.py");
+
+                sbcState = takeoff;
                 //SWITCH CONDITION
                 if (ircsp.acceleration < ircsp.CRUISE_ACCEL)
                 {
                     sbcState = cruising;
                     ircsp.toggle();
                 }
-            }
+                break;
+
+
                 
             case cruising:
-            {
-                ircsp.acceleration = 1;
-                if (i >10)
-                    ircsp.acceleration = 4;
+                ircsp.check_telemetry(bootTime,accelerometer,tec);
+                sbcState = cruising;
                 
                 //SWITCH CONDITION
                 if (ircsp.acceleration > ircsp.DECENT_ACCEL )
@@ -100,24 +108,27 @@ int main(void)
                     sbcState = shutdown;
                     ircsp.toggle();
                 }
-            }
+                break;
+
                 
             case falling:
-            {
-                ircsp.acceleration = 1;
-                
+                ircsp.check_telemetry(bootTime,accelerometer,tec);
                 //SWITCH CONDITION
                 if (ircsp.dataspace < ircsp.MIN_DATASPACE )
                 {
                     sbcState = shutdown;
                     ircsp.toggle();
                 }
-            }
-                
+                break;
+            
             case shutdown:
-            {//ircsp.check_telemetry(bootTime,accelerometer,tec);
-            }
+                ircsp.check_telemetry(bootTime,accelerometer,tec);
+                break;
+                
         }
     }
+    
+    fclose(logFile) ;
+    fclose(telemetryFile);
     return 0;
 }

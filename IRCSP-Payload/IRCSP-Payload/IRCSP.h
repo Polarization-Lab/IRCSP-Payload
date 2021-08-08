@@ -25,6 +25,7 @@ public:
     float acceleration;
     float t_sbc;
     float t_ircsp;
+    float humidity;
     float dataspace;
     float PID_target;
     
@@ -35,6 +36,7 @@ public:
     float CRUISE_ACCEL = 1.1;
     float PREFLIGHT_TIME = 10;
     float MIN_DATASPACE  = 1;
+    int   sampling = 60; //interval to take telemetry
     
     void check_telemetry(time_t, Accelerometer&,TEC&);
     void set_PID(long);

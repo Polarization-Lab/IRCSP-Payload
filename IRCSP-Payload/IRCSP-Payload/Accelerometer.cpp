@@ -24,7 +24,7 @@ void Accelerometer::getAcceleration() {
     float a = 0;
     for (int i = 0; i < 3; i++) {
         gValues[i] = (float) rand()/RAND_MAX;
-        a = a + pow((float) rand()/RAND_MAX,2);
+        a = a + pow((float) rand()/RAND_MAX +.1,2);
     total_accel = sqrt(a);
     }
 

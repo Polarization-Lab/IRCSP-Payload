@@ -9,6 +9,7 @@
 #include "ConcreteIRCSPStates.h"
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 //#include "Accelerometer.h"
 
@@ -32,18 +33,28 @@ void IRCSP::toggle()
 }
 
 
-void IRCSP::check_telemetry (time_t bootTime, Accelerometer& accelerometer, TEC& tec )
+void IRCSP::check_telemetry (time_t bootTime, Accelerometer& accelerometer, TEC& tec, NTCThermistorDecoder& adc )
 {
-    accelerometer.getAcceleration();
-    
-    
+
     time_elapsed = time(NULL) - bootTime;
+    
+    //acceleration
+    accelerometer.getAcceleration();
     acceleration = accelerometer.total_accel;
-    t_sbc = 1; // GetStdoutFromCommand("ts7800ctl -t " );
-    t_ircsp = 1;
+    
+    //temperatures
+    t_sbc =  GetStdoutFromCommand("ts7800ctl -t " );
+    t_ircsp = adc.getTemp(temperatures);
     
     //get data space
     dataspace = GetStdoutFromCommand("du -k " + dataPath);
+    
+    //camera temperatures from .txt file
+    std::fstream myfile1(dataPath+ "temp1.txt", std::ios_base::in);
+    myfile1 >> cam1_t;
+    std::fstream myfile2(dataPath+ "temp2.txt", std::ios_base::in);
+    myfile2 >> cam2_t;
+    
 }
 
 void IRCSP::set_PID (long temp)

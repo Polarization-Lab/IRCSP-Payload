@@ -1,243 +1,30 @@
-Sun Aug  8 14:14:05 2021
- Main Function Initiated 
-Sun Aug  8 14:14:05 2021
- System Booting 
-Sun Aug  8 14:14:06 2021
- Entering Preflight 
-Sun Aug  8 14:14:17 2021
- Entering TakeOff 
+ Main Function Initiated Sun Aug  8 20:01:46 2021
+ System Booting Sun Aug  8 20:01:46 2021
+ Entering Preflight  Sun Aug  8 20:01:46 2021
+ Entering TakeOff Sun Aug  8 20:01:51 2021
 1.43558 1 1 0
-Sun Aug  8 14:14:17 2021
- Cruising 
+ CruisingSun Aug  8 20:01:51 2021
 0.652864 1 1 0 
-Sun Aug  8 14:14:17 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:22:29 2021
- Main Function Initiated 
-Sun Aug  8 14:22:29 2021
- System Booting 
-Sun Aug  8 14:22:29 2021
- Entering Preflight 
-Sun Aug  8 14:22:40 2021
- Entering TakeOff 
+ Main Function Initiated Sun Aug  8 20:05:06 2021
+ System Booting Sun Aug  8 20:05:06 2021
+ Entering Preflight  Sun Aug  8 20:05:06 2021
+ Entering TakeOff Sun Aug  8 20:05:11 2021
 1.43558 1 1 0
-Sun Aug  8 14:22:40 2021
- Entering TakeOff 
+ Cruising Sun Aug  8 20:05:11 2021
+0.652864 1 1 0 
+ Data Max Reached, Shutting Down Sun Aug  8 20:05:11 2021
+1.48014 1 1 0 
+ Main Function Initiated Sun Aug  8 20:22:32 2021
+ System Booting Sun Aug  8 20:22:32 2021
+ Cruising Sun Aug  8 20:22:32 2021
+ Data Max Reached, Shutting Down Sun Aug  8 20:22:32 2021
+1.43558 1 1 0 
+ Main Function Initiated Sun Aug  8 20:23:39 2021
+ System Booting Sun Aug  8 20:23:39 2021
+ Entering Preflight  Sun Aug  8 20:23:39 2021
+ Entering TakeOff Sun Aug  8 20:23:44 2021
 1.43558 1 1 0
-Sun Aug  8 14:22:40 2021
- Cruising 
+ Cruising Sun Aug  8 20:23:44 2021
 0.652864 1 1 0 
-Sun Aug  8 14:22:40 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:32:13 2021
- Main Function Initiated 
-Sun Aug  8 14:32:13 2021
- System Booting 
-Sun Aug  8 14:32:13 2021
- Entering Preflight 
-Sun Aug  8 14:32:24 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:32:24 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:32:24 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:32:24 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:33:35 2021
- Main Function Initiated 
-Sun Aug  8 14:33:35 2021
- System Booting 
-Sun Aug  8 14:33:35 2021
- Entering Preflight 
-Sun Aug  8 14:33:46 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:33:46 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:34:40 2021
- Main Function Initiated 
-Sun Aug  8 14:34:40 2021
- System Booting 
-Sun Aug  8 14:34:40 2021
- Entering Preflight 
-Sun Aug  8 14:34:51 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:34:51 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:34:51 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:34:51 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:35:13 2021
- Main Function Initiated 
-Sun Aug  8 14:35:13 2021
- System Booting 
-Sun Aug  8 14:35:13 2021
- Entering Preflight 
-Sun Aug  8 14:35:24 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:35:24 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:35:24 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:35:24 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:35:55 2021
- Main Function Initiated 
-Sun Aug  8 14:35:55 2021
- System Booting 
-Sun Aug  8 14:35:55 2021
- Entering Preflight 
-Sun Aug  8 14:36:06 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:36:06 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:36:06 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:36:06 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:37:59 2021
- Main Function Initiated 
-Sun Aug  8 14:37:59 2021
- System Booting 
-Sun Aug  8 14:37:59 2021
- Entering Preflight 
-Sun Aug  8 14:38:10 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:38:10 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:38:10 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:38:10 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:38:39 2021
- Main Function Initiated 
-Sun Aug  8 14:38:39 2021
- System Booting 
-Sun Aug  8 14:38:39 2021
- Entering Preflight 
-Sun Aug  8 14:38:51 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:38:51 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:41:04 2021
- Main Function Initiated 
-Sun Aug  8 14:41:04 2021
- System Booting 
-Sun Aug  8 14:41:04 2021
- Entering Preflight 
-Sun Aug  8 14:41:15 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:41:15 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:46:21 2021
- Main Function Initiated 
-Sun Aug  8 14:46:21 2021
- System Booting 
-Sun Aug  8 14:46:21 2021
- Entering Preflight 
-Sun Aug  8 14:46:32 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:46:32 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:48:28 2021
- Main Function Initiated 
-Sun Aug  8 14:48:28 2021
- System Booting 
-Sun Aug  8 14:48:28 2021
- Entering Preflight 
-Sun Aug  8 14:48:39 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:48:39 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:49:28 2021
- Main Function Initiated 
-Sun Aug  8 14:49:28 2021
- System Booting 
-Sun Aug  8 14:49:28 2021
- Entering Preflight 
-Sun Aug  8 14:49:39 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:49:39 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:50:05 2021
- Main Function Initiated 
-Sun Aug  8 14:50:05 2021
- System Booting 
-Sun Aug  8 14:50:05 2021
- Entering Preflight 
-Sun Aug  8 14:50:16 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:50:16 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:54:00 2021
- Main Function Initiated 
-Sun Aug  8 14:54:00 2021
- System Booting 
-Sun Aug  8 14:54:00 2021
- Entering Preflight 
-Sun Aug  8 14:54:11 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:54:11 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:55:17 2021
- Main Function Initiated 
-Sun Aug  8 14:55:17 2021
- System Booting 
-Sun Aug  8 14:55:17 2021
- Entering Preflight 
-Sun Aug  8 14:55:28 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:55:28 2021
- Cruising 
-0.652864 1 1 0 
-Sun Aug  8 14:56:17 2021
- Main Function Initiated 
-Sun Aug  8 14:56:17 2021
- System Booting 
-Sun Aug  8 14:56:17 2021
- Entering Preflight 
-Sun Aug  8 14:56:28 2021
- Entering TakeOff 
-1.43558 1 1 0
-Sun Aug  8 14:56:28 2021
- Cruising 
-0.652864 1 1 0 
+ Data Max Reached, Shutting Down Sun Aug  8 20:23:44 2021
+1.30715 1 1 0 

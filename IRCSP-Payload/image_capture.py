@@ -12,9 +12,9 @@ temperatures and store them with the Operating System Timestamp at time of creat
 order to create a tracking system for each file created during the flight mission.
 '''
 
-import os, datetime, time, h5py
+import os, datetime, time, h5py, random
 
-def take_image(filename):
+def take_image(filename,path):
     """take_image: The function will create a Operating System timestamp variable (OS_time), configure
                 the 2 IRCSP cameras to take an image (image1 & image2) and store the FPA temperatures
                 (temp1 & temp2) into an HDF5 File format with a unique naming convention.
@@ -32,11 +32,8 @@ def take_image(filename):
         OS_time = now.strftime("%H:%M:%S")
 
         #get FPA temperature
-        temp1 = 35
-        temp2 = 35
-        print(temp1)
-        print(temp2)
-
+        temp1 = random.uniform(0,35)
+        temp2 = random.uniform(0,35)
        
 
     except:
@@ -48,16 +45,14 @@ def take_image(filename):
             h5.attrs["OS_time"] = OS_time
             h5["temp1"] = temp1
             h5["temp2"] = temp2
-
-
-        
-
-        #Time/Speed Test - Finish
-        finish = datetime.datetime.now()
-        print("Image Capture File: ", filename," created in " , finish - start)
-
-        #Adjust Sleep for File Creation Rate - (File/Seconds)
-        time.sleep(1)
+            
+        path ='/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/data/'
+        file1 = open(os.path.join(path,"temp1.txt"),"w+")
+        file2 = open(os.path.join(path,"temp2.txt"),"w+")
+        file1.writelines(str(temp1))
+        file2.writelines(str(temp2))
+        file1.close()
+        file2.close()
 
 #==========================================================
 def main():
@@ -75,12 +70,12 @@ def main():
     directory = os.listdir(path)
 
     #Check Destination Directory (path)
-   # path ='/Users/kirahart/Dropbox/GitHub/IRSCP-Payload/IRCSP-Payload/data/'
-    #directory = os.listdir(path)
+    path ='/Users/kirahart/Documents/Github/IRSCP-Payload/IRCSP-Payload/data/'
+    directory = os.listdir(path)
     
-    print()
-    print("Directory Path %r : \n" % (path))
-    print("List of File Names: %s \n" % (directory))
+    #print()
+    #print("Directory Path %r : \n" % (path))
+    #print("List of File Names: %s \n" % (directory))
     
     
     #File Name - Control Variable
@@ -93,12 +88,10 @@ def main():
         count+=1
         name = "Capture" + str(count) + ".hdf5"
     else:
-        #Creates New File with next available value!
-        while name not in directory:
-            name = "Capture" + str(count) + ".hdf5"
-            filename = os.path.join(path,name)
-            take_image(filename)
-            count += 1
+        name = "Capture" + str(count) + ".hdf5"
+        filename = os.path.join(path,name)
+        take_image(filename,path)
+
 
 
 if __name__ == '__main__':

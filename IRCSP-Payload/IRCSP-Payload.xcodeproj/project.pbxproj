@@ -11,7 +11,6 @@
 		E3A8E85426BC7FF700929022 /* ConcreteIRCSPStates.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */; };
 		E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E85526BC851900929022 /* IRCSP.cpp */; };
 		E3A8E86B26BDD2E900929022 /* Accelerometer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */; };
-		E3A8E87126BDD77600929022 /* TEC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A8E86F26BDD77600929022 /* TEC.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,8 +35,11 @@
 		E3A8E85526BC851900929022 /* IRCSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IRCSP.cpp; sourceTree = "<group>"; };
 		E3A8E85826BDA56800929022 /* Accelerometer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Accelerometer.h; sourceTree = "<group>"; };
 		E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Accelerometer.cpp; sourceTree = "<group>"; };
-		E3A8E86F26BDD77600929022 /* TEC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TEC.cpp; sourceTree = "<group>"; };
 		E3A8E87026BDD77600929022 /* TEC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TEC.hpp; sourceTree = "<group>"; };
+		E3C68FBB26C0D60B00E2058A /* ADC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ADC.h; path = ../../IRCSPApp1/ConsoleApplication1/ADC.h; sourceTree = "<group>"; };
+		E3C68FBC26C0D60B00E2058A /* i2c-dev.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "i2c-dev.h"; path = "../../IRCSPApp1/ConsoleApplication1/i2c-dev.h"; sourceTree = "<group>"; };
+		E3C68FBE26C0DE0300E2058A /* ADC.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ADC.hpp; sourceTree = "<group>"; };
+		E3C68FC026C0DF5B00E2058A /* NTCThermistorDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NTCThermistorDecoder.h; path = ../../IRCSPApp1/ConsoleApplication1/NTCThermistorDecoder.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,9 +74,12 @@
 			children = (
 				E3A8E84526BC63A600929022 /* ConcreteIRCSPStates.cpp */,
 				E3A8E82F26BB25D400929022 /* main.cpp */,
+				E3C68FC026C0DF5B00E2058A /* NTCThermistorDecoder.h */,
+				E3C68FBE26C0DE0300E2058A /* ADC.hpp */,
 				E3A8E85826BDA56800929022 /* Accelerometer.h */,
+				E3C68FBB26C0D60B00E2058A /* ADC.h */,
+				E3C68FBC26C0D60B00E2058A /* i2c-dev.h */,
 				E3A8E86A26BDD2E900929022 /* Accelerometer.cpp */,
-				E3A8E86F26BDD77600929022 /* TEC.cpp */,
 				E3A8E87026BDD77600929022 /* TEC.hpp */,
 				E3A8E85526BC851900929022 /* IRCSP.cpp */,
 				E3A8E84226BC612300929022 /* IRCSPState.h */,
@@ -144,7 +149,6 @@
 				E3A8E86B26BDD2E900929022 /* Accelerometer.cpp in Sources */,
 				E3A8E85626BC851900929022 /* IRCSP.cpp in Sources */,
 				E3A8E83026BB25D400929022 /* main.cpp in Sources */,
-				E3A8E87126BDD77600929022 /* TEC.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

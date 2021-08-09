@@ -12,7 +12,7 @@ void Boot::toggle(IRCSP* ircsp)
     if (ircsp -> time_elapsed < ircsp->PREFLIGHT_TIME ) {
         // Boot -> Preflight (TODO: change to check for stored data)
         ircsp->setState(Preflight::getInstance());}
-    else  {
+    if (ircsp -> cam1_t < ircsp-> MIN_TEMP || ircsp -> cam2_t < ircsp-> MIN_TEMP ){
         // Boot -> Cruising
         ircsp->setState(Cruising::getInstance());}
          
@@ -55,9 +55,13 @@ IRCSPState& Takeoff::getInstance()
 }
 
 void Cruising::toggle(IRCSP* ircsp)
-{ 
-    // Cruising -> Shutdown
-    ircsp->setState(Falling::getInstance());
+{
+    if (ircsp-> acceleration > ircsp-> DECENT_ACCEL) {
+    // Takeoff -> Crusing
+        ircsp->setState(Cruising::getInstance());}
+    if (ircsp-> dataspace > ircsp-> MAX_DATA) {
+        // Takeoff -> Shutdown
+        ircsp->setState(Shutdown::getInstance());}
 }
 
 IRCSPState& Cruising::getInstance()

@@ -6,7 +6,6 @@
 //
 
 #include "IRCSP.h"
-#include "ConcreteIRCSPStates.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -15,53 +14,36 @@
 
 IRCSP::IRCSP()
 {
-    // All lights are initially turned off
-    currentState = &Boot::getInstance();
+
 }
 
-void IRCSP::setState(IRCSPState& newState)
-{
-    currentState->exit(this);  // do stuff before we change state
-    currentState = &newState;  // actually change states now
-    currentState->enter(this); // do stuff after we change state
-}
-
-void IRCSP::toggle()
-{
-    // Delegate the task of determining the next state to the current state
-    currentState->toggle(this);
-}
-
-
-void IRCSP::check_telemetry (time_t bootTime, Accelerometer& accelerometer, TEC& tec, NTCThermistorDecoder& adc )
+void IRCSP::check_telemetry (time_t bootTime)
 {
 
     time_elapsed = time(NULL) - bootTime;
     
-    //acceleration
-    accelerometer.getAcceleration();
-    acceleration = accelerometer.total_accel;
-    
     //temperatures
-    t_sbc =  GetStdoutFromCommand("ts7800ctl -t " );
-    t_ircsp = adc.getTemp(temperatures);
+    t_sbc =  GetStdoutFromCommand("ts7800ctl -t " )/1000;
     
     //get data space
     dataspace = GetStdoutFromCommand("du -k " + dataPath);
     
     //camera temperatures from .txt file
-    std::fstream myfile1(dataPath+ "temp1.txt", std::ios_base::in);
+    std::fstream myfile1("/mnt/sdcard/image_data/temp1.txt", std::ios_base::in);
     myfile1 >> cam1_t;
-    std::fstream myfile2(dataPath+ "temp2.txt", std::ios_base::in);
+    std::fstream myfile2("/mnt/sdcard/image_data/temp2.txt", std::ios_base::in);
     myfile2 >> cam2_t;
+    
+    //BME280 readings from .txt file
+    std::fstream myfile3("/mnt/sdcard/image_data/hum.txt", std::ios_base::in);
+    myfile3 >> humidity;
+    std::fstream myfile4("/mnt/sdcard/image_data/temp.txt", std::ios_base::in);
+    myfile4 >> t_ircsp;
+    std::fstream myfile5("/mnt/sdcard/image_data/pres.txt", std::ios_base::in);
+    myfile5 >> pressure;
     
 }
 
-void IRCSP::set_PID (long temp)
-{
-    PID_target = temp;
-    //TODO: add function setting PID parameteres
-}
 
 int IRCSP::GetStdoutFromCommand(std::string cmd) {
 

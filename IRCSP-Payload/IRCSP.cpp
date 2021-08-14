@@ -23,7 +23,7 @@ void IRCSP::check_telemetry (time_t bootTime)
     time_elapsed = time(NULL) - bootTime;
     
     //temperatures
-    t_sbc =  GetStdoutFromCommand("ts7800ctl -t " )/1000;
+    t_sbc =  GetStdoutFromCommand("ts7800ctl -t " );
     
     //get data space
     dataspace = GetStdoutFromCommand("du -k " + dataPath);

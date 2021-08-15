@@ -1,41 +1,39 @@
 #include <cstdio>
 #include <cmath>
-#include "ADC.h"
-#include "Accelerometer.h"
 #include <time.h>
 #include <sys/mman.h>
 #include <linux/pci.h>
 #include <unistd.h>
 #include <termios.h>
-#include "IRCSP.h"
-
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <cstdio>
-#include <cmath>
-#include <time.h>
-#include <sys/mman.h>
 #include <fstream>
-#include <linux/pci.h>
-#include <unistd.h>
-#include <termios.h>
 #include <iostream>
 #include <stdexcept>
-#include<sstream>
+#include <sstream>
+
+//to check dev ports
+#include <sys/types.h>
+#include <sys/stat.h>
+
+//instrument control headers
+#include "ADC.h"
+#include "Accelerometer.h"
+#include "IRCSP.h"
+
 
 enum SBCstate { boot, preflight, takeoff, shutdown } ; //SBC states
 
-bool check_connection(); //declare USB connection check
+//fucntions to check if cameras and BME280 have disconnected
+bool port_exists(const char* dev); //checks if dev port exists
+bool check_connection(); //check for bool connection
 
 //functions which execute child python processes
 int check_BME280();
 int take_image();
 void log_status(std::string message, bool wtime);
 
-int main(void)
-{
-    
+int main(void){
     time_t bootTime = time(NULL);// stores epoch time;
     time_t currentTime;
     float temperatures[5]; //readout from ADC
@@ -65,7 +63,7 @@ int main(void)
     telemetry.close();
     
     //Status trackers for child processes
-    pid_t childPid, wpid;
+    pid_t wpid;
     SBCstate sbcState = boot;
     int status = 0;
     
@@ -124,18 +122,12 @@ int main(void)
             tStart = time(NULL);
         }
 
-        switch (sbcState) //state handler
-        {
+        switch(sbcState){
             case boot:
                 //print status to cout and log
-                std::cout << " System Booting "  ;
+                std::cout << " System Booting \n"  ;
                 log_status( " System Booting ", 1 ) ;
-                
-                //switch conditions
-                if (bootTime != .1){
-                    //wait until booted
-                    sleep(5);
-                }
+                sleep(5);
                     
                 if(ircsp.cam1_t < 25 || ircsp.cam2_t < 25){   //assume instrument is at altitude is cameras are cold
                     sbcState = takeoff;
@@ -170,7 +162,7 @@ int main(void)
                     log_status(" Acceleration = " + std::to_string( ircsp.acceleration ) + "G", 0);
                     log_status(" Preflight time = " + std::to_string(currentTime -bootTime ) + "s", 0);
                 }
-            break;
+                break;
 
                     
             case takeoff:
@@ -190,24 +182,29 @@ int main(void)
                     log_status(" Acceleration = " + std::to_string( ircsp.acceleration ) + "G", 0);
                     log_status(" flight time = " + std::to_string(currentTime -bootTime) + "s", 0);
                 }
-                
                 break;
 
                                     
             case shutdown:
-                sleep(10);
-                //system("ts7800ctl -s 3600"); // put SBC in sleep mode
+                sleep(100);
                 break;
                     
         }
-        while ((wpid = wait(&status)) > 0); //wait for child to finish
+        //wait for child to finish
+        while ((wpid = wait(&status)) > 0);
+        
+        //check that ACM communication is live, will exit while loop if not
+        connected = check_connection();
         sleep(ircsp.wait_time);
        
     }
+    //if while loop is exited, reboot sbc
+    log_status("lost USB port connection, rebooting", 1);
+    sleep(5);
+    system("reboot")
     
     return 0;
 }
-
 
 int check_BME280(){
     int status;
@@ -215,7 +212,7 @@ int check_BME280(){
     if((childPid = fork()) == 0 ){
         execlp("python3","python3","/mnt/sdcard/image_data/read_therm.py","read_therm.py");
         perror("error");
-        log_status("BME check error" ,1);
+        log_status("bme280 error" ,1);
         log_status(strerror(errno), 0);
         exit(errno);
     }
@@ -248,4 +245,36 @@ void log_status(std::string message, bool wtime){
         log << message << "\n" ;
     }
     log.close();
+}
+
+bool port_exists(const char* dev){ //declare USB connection check
+    struct stat sb;
+    return (stat(dev, &sb) == 0); // true if open, false otherwise
+}
+
+bool check_connection(){
+    //define device ports that should be checked
+    const char* ACM0 = "/dev/ttyACM0" ;
+    const char* ACM1 = "/dev/ttyACM1" ;
+    const char* ACM2 = "/dev/ttyACM2" ;
+    
+    //check for existence
+    bool acm0 = port_exists(ACM0);
+    bool acm1 = port_exists(ACM1);
+    bool acm2 = port_exists(ACM2);
+    
+    bool existence = 1;
+    
+    if(acm0 && acm1 && acm2){
+        existence = 1;
+    }
+    if(!acm0 || !acm1){
+        std::cout<< "camera(s) lost connection \n";
+        existence = 0;
+    }
+    if(!acm2){
+        std::cout<< "BME280 lost connection \n" ;
+        existence = 0;
+    }
+    return existence;
 }

@@ -38,7 +38,7 @@ int main(void){
     time_t currentTime;
     float temperatures[5]; //readout from ADC
     bool adcChannels[5] = { 1 };
-    uint_8 settings[4];
+    uint8_t settings[4];
 
     //Generate Instrument Class Objects
     Accelerometer* accel;

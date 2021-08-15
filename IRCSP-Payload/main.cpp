@@ -38,6 +38,7 @@ int main(void){
     time_t currentTime;
     float temperatures[5]; //readout from ADC
     bool adcChannels[5] = { 1 };
+    uint_8 settings[4];
 
     //Generate Instrument Class Objects
     Accelerometer* accel;
@@ -199,9 +200,9 @@ int main(void){
        
     }
     //if while loop is exited, reboot sbc
-    log_status("lost USB port connection, rebooting", 1);
+    log_status("lost port connection(s), rebooting", 1);
     sleep(5);
-    system("reboot")
+    system("reboot");
     
     return 0;
 }
@@ -237,7 +238,7 @@ int take_image(){
 void log_status(std::string message, bool wtime){
     std::fstream log;
     time_t localtime = time(NULL) ;
-    log.open (ircsp.logPath,std::fstream::app);
+    log.open ("/mnt/sdcard/image_data/log.txt",std::fstream::app);
     if(wtime){
         log <<  ctime(&localtime) << message << "\n" ;
     }

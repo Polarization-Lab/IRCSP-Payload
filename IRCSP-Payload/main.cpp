@@ -3,6 +3,7 @@
 #include <time.h>
 #include <sys/mman.h>
 #include <linux/pci.h>
+#include <sys/reboot.h>
 #include <unistd.h>
 #include <termios.h>
 #include <sys/wait.h>
@@ -32,8 +33,14 @@ bool check_connection(); //check for bool connection
 int check_BME280();
 int take_image();
 void log_status(std::string message, bool wtime);
+bool time_up(float hours);
 
 int main(void){
+    
+    //check time in fligth
+    bool inpreflight = 1;
+    float preflight_time = 3; //time in preflight state
+    
     time_t bootTime = time(NULL);// stores epoch time;
     time_t currentTime;
     float temperatures[5]; //readout from ADC
@@ -129,13 +136,12 @@ int main(void){
                 std::cout << " System Booting \n"  ;
                 log_status( " System Booting ", 1 ) ;
                 sleep(5);
+                inpreflight = time_up(preflight_time);
                     
-                if(ircsp.cam1_t < 25 || ircsp.cam2_t < 25){   //assume instrument is at altitude is cameras are cold
+                if(!inpreflight){   //check how much telemetry has already been written
                     sbcState = takeoff;
                     currentTime = time(NULL);
                     log_status(" Entering TakeOff " , 1);
-                    log_status(" Acceleration = " + std::to_string( ircsp.acceleration ) + "G \n", 0);
-                    log_status(" Preflight time = " + std::to_string(bootTime - currentTime ) + "s \n", 0);
                 }
                 
                 else{
@@ -153,14 +159,14 @@ int main(void){
                 accel->getAcceleration();
                 ircsp.acceleration = accel->gValues[2];
                 currentTime = time(NULL);
+                inpreflight = time_up(preflight_time);
                     
                 //SWITCH CONDITION
-                if (currentTime - bootTime > ircsp.PREFLIGHT_TIME || ircsp.acceleration > ircsp.TAKEOFF_ACCEL ){
+                if (!inpreflight){
                     
                     sbcState = takeoff;
                     std::cout << "take-off \n";
                     log_status(" Entering TakeOff " , 1);
-                    log_status(" Acceleration = " + std::to_string( ircsp.acceleration ) + "G", 0);
                     log_status(" Preflight time = " + std::to_string(currentTime -bootTime ) + "s", 0);
                 }
                 break;
@@ -202,7 +208,9 @@ int main(void){
     //if while loop is exited, reboot sbc
     log_status("lost port connection(s), rebooting", 1);
     sleep(5);
-    system("reboot");
+    
+    sync();
+    reboot(RB_AUTOBOOT);
     
     return 0;
 }
@@ -211,7 +219,7 @@ int check_BME280(){
     int status;
     pid_t childPid;
     if((childPid = fork()) == 0 ){
-        execlp("python3","python3","/mnt/sdcard/image_data/read_therm.py","read_therm.py");
+        execlp("python3","python3","/mnt/sdcard/image_data/read_therm.py","read_therm.py",NULL);
         perror("error");
         log_status("bme280 error" ,1);
         log_status(strerror(errno), 0);
@@ -225,7 +233,7 @@ int take_image(){
     int status;
     pid_t childPid;
     if((childPid = fork()) == 0 ){
-        execlp("python3","python3","/mnt/sdcard/image_data/image_capture.py","image_capture.py");
+        execlp("python3","python3","/mnt/sdcard/image_data/image_capture.py","image_capture.py",NULL);
         perror("error");
         log_status("imag. aq. error" ,1);
         log_status(strerror(errno), 0);
@@ -278,4 +286,23 @@ bool check_connection(){
         existence = 0;
     }
     return existence;
+}
+
+bool time_up(float hours){ //returns true if still in preflight
+    int rows=0;
+    std::ifstream file("/mnt/sdcard/image_data/telemetry.csv");
+    std::string line;
+    while (getline(file, line))
+    rows++;
+    std::cout << "total rows = "<< rows << "\n";
+    
+    int max_rows = hours *60 /10;
+    
+    
+    if(rows < max_rows){
+        return 1 ;
+    }
+    else{
+        return 0;
+    }
 }

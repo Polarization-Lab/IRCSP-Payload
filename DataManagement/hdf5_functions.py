@@ -44,4 +44,4 @@ fn = '/Volumes/KESU/image_data/Capture300.hdf5'
 print_groups(fn)
 
 with h5py.File(fn,'r') as hf:
-        image1 =np.mean( hf.open('image1'))
+        image1 =np.mean( hf.values('image1'))

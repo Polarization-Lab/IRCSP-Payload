@@ -1,3 +1,3 @@
 SELECT id , position, val
 FROM IRCSP.rawdata 
-WHERE wavelength = 11 AND camera = 1;
+WHERE wavelength = 8 AND camera = 1 AND 110 <= position AND position <= 125;

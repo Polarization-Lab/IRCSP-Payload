@@ -10,6 +10,9 @@ Meredith Kupinski
 **Lead Engineer** <br />
 Jeremy Parkinson
 
+**PhD Student** <br />
+Jaclyn John
+
 **2020 UofA Senior Design Engineering Team 21008** <br />
 Nayleth Ramirez  <br />
 Jeremy Parkinson  <br />

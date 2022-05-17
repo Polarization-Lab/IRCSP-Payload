@@ -1,5 +1,5 @@
 # IRSCP-Payload
-The sowftare associated with the IRSCP high altitude balloon payload funded by the NASA Earth and Space Science and Technology (FINESST) program in the earth science catagory. 
+The software associated with the IRSCP high altitude balloon payload funded by the NASA Earth and Space Science and Technology (FINESST) program in the earth science catagory. 
 
 **Future Investigator (FI)** <br />
 Kira Hart Shanks

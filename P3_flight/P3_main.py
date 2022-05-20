@@ -9,9 +9,9 @@ def main():
     from instrument_control import P3_image_capture
     import time 
     
-    wait = 60 #seconds
+    wait = 30 #seconds
     i = 0;
-    while i < 240: #over 4 hours later: each loop will be a little over than 30 seconds 
+    while i < 480: #over 4 hours later: each loop will be a little over than 30 seconds 
     #since it will wait 30 seconds before doing everything again
     
         P3_image_capture()

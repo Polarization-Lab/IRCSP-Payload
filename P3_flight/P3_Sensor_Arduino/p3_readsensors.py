@@ -1,26 +1,26 @@
+# -*- coding: utf-8 -*-
 """
 function that reads BME sensors and thermisters
-output: "BME1 Pressure (mbar),BME1 Humdity(%),BME1 Temp *C,BME2 Pressure (mbar),BME2 Humdity(%),BME2 Temp *C,Thermister Temp (*C)"
+output: "BME1 Pressure (mbar),BME1 Humdity(%),BME1 Temp (*C),BME2 Pressure (mbar),BME2 Humdity(%),BME2 Temp (*C),Thermister Temp (*C)"
 to use this function, in the main Python include "from p3_readsensors import *"
-
 written by Grady Morrissey - 05/24/2022
-
 """
 
 import time
 import serial
 import numpy as np
-import json #this is how we will save/read data to/from a file in Python
 
 def p3_readsensors(): #no inputs, but could have an input by a filename to save to or similar
     
+    save_path = 'C:\\Users\\khart\\Documents\\Summer2022Campaign\\IRCSP1\\TestRuns\\streamingdata\\'
+
     try:  #this try except statement is just in case the code errors, probably isn't necessary but would avoid a crash if it happened
         while True:
             #time.sleep(.1)
-            ser = serial.Serial('/dev/tty.usbmodem141201',9600)
+            ser = serial.Serial('COM18',9600)
             line = ser.readline()
-            str = line.decode()
-            stripped_str = str.strip()
+            strip = line.decode()
+            stripped_str = strip.strip()
             vallist = stripped_str.split(",")
             vallist = [float(item) for item in vallist]
             if len(vallist) == 7:  #recursively looks for sensor vals until it works
@@ -43,23 +43,25 @@ def p3_readsensors(): #no inputs, but could have an input by a filename to save 
                 #return list of sensor values
                 fin_list = vallist
                 fin_list[6] = therm_temp
-                return fin_list
+                print(fin_list)
                 break
         ser.close()
     except:
-        return [None for YY in range(7)]
-            
-            
-"""
+        print([None for YY in range(7)])
+    
+    
+
+""""              
 #can use this to save data to a file
+#now save data
+filename = "sensordat.json"
+with open(save_path + filename, 'w') as outfile:
+    json.dump(fin_list, outfile)
+    
 
-        #now save data
-        filename = "sensordat.json"
-        with open(filename, 'w') as outfile:
-            json.dump(fin_list, outfile)
+with open(filename, 'r') as json_file:
+    test = json.load(json_file)
+print(test)
+"""""
 
-        with open(filename, 'r') as json_file:
-            test = json.load(json_file)
 
-        print(test)
-"""

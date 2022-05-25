@@ -33,11 +33,17 @@ def main():
         timestamp = get_timestamp() #take time at start of measurement 
         epoch = time.time()
         
-        im1 = P3_image_capture()[0]
-        im2 = P3_image_capture()[1]
-        t1 = P3_image_capture()[2]
-        t2 = P3_image_capture()[3]
+        IRCSPdata = P3_image_capture()
+        
+        im1 = IRCSPdata[0]
+        im2 = IRCSPdata[1]
+        t1 = IRCSPdata[2]
+        t2 = IRCSPdata[3]
 
+    
+        sensordata = p3_readsensors()
+        sensordata.append(timestamp)
+        
         
         with h5py.File(save_path +  'meas_' + str(i) + '.h5', 'w') as h5:
             h5.attrs["timestamp"] = timestamp
@@ -50,10 +56,6 @@ def main():
     
         print('h5 file meas_' + str(i) + ' created')
 
-    
-        sensordata = p3_readsensors()
-        sensordata.append(timestamp)
-        
         with open(save_path + 'telemetry.csv', 'a') as outfile:
             writer = csv.writer(outfile)
             writer.writerow(sensordata)
@@ -61,4 +63,3 @@ def main():
         time.sleep(wait)
         i +=1
         
-

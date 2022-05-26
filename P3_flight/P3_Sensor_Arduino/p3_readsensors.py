@@ -1,29 +1,43 @@
-# -*- coding: utf-8 -*-
 """
 function that reads BME sensors and thermisters
-output: "BME1 Pressure (mbar),BME1 Humdity(%),BME1 Temp (*C),BME2 Pressure (mbar),BME2 Humdity(%),BME2 Temp (*C),Thermister Temp (*C)"
+output: "BME1 Pressure (mbar),BME1 Humdity(%),BME1 Temp *C,BME2 Pressure (mbar),BME2 Humdity(%),BME2 Temp *C,Thermister Temp (*C)"
 to use this function, in the main Python include "from p3_readsensors import *"
+
+notes: the serial communication with the Arduino frequently loses or gains strange bits, giving a strange data output, this code has many workaround checks to give a valid output, ideally the serial communication with the Arduino would be fixed so these checks are not necessary
+
 written by Grady Morrissey - 05/24/2022
+
 """
 
 import time
 import serial
 import numpy as np
+import json #this is how we will save/read data to/from a file in Python
 
 def p3_readsensors(): #no inputs, but could have an input by a filename to save to or similar
     
-    save_path = 'C:\\Users\\khart\\Documents\\Summer2022Campaign\\IRCSP1\\TestRuns\\streamingdata\\'
+    #ser = serial.Serial('/dev/tty.usbmodem141201',9600,timeout=10)
+    ser = serial.Serial('/dev/tty.usbmodem142201',115200,timeout=1,rtscts=True)
+
+    time.sleep(1) #to help bootloader
 
     try:  #this try except statement is just in case the code errors, probably isn't necessary but would avoid a crash if it happened
-        while True:
-            #time.sleep(.1)
-            ser = serial.Serial('COM18',9600)
-            line = ser.readline()
-            strip = line.decode()
-            stripped_str = strip.strip()
-            vallist = stripped_str.split(",")
-            vallist = [float(item) for item in vallist]
-            if len(vallist) == 7:  #recursively looks for sensor vals until it works
+        while True: #recursively looks for sensor vals until it works
+            m1 = [float(item) for item in ser.readline().decode().strip().split(",")] #can throw an error if there is a strange bit in line
+            #read next two measurements to ensure valid data, output most recent correct list
+            m2 = [float(item) for item in ser.readline().decode().strip().split(",")]
+            m3 = [float(item) for item in ser.readline().decode().strip().split(",")]
+            diff1 = abs(m1[0]-m2[0]) #only check most susceptible first pressure value
+            diff2 = abs(m1[0]-m3[0])
+            diff3 = abs(m2[0]-m3[0])
+            if min([diff1,diff2,diff3]) == diff1: #3rd run is least valid
+                vallist = m1
+            elif min([diff1,diff2,diff3]) == diff2: #2nd run is least valid
+                vallist = m1
+            else: #min[diff1,diff2,diff3] == diff1  #1st run is least valid
+                vallist = m2
+
+            if (len(vallist) == 7):  #one check for good data
                 #convert therm_V to temp
                 therm_V = float(vallist[6])
                 known_R = 10000
@@ -42,26 +56,25 @@ def p3_readsensors(): #no inputs, but could have an input by a filename to save 
                 therm_temp -= 273 #in C
                 #return list of sensor values
                 fin_list = vallist
-                fin_list[6] = therm_temp
-                print(fin_list)
+                fin_list[6] = round(therm_temp,3)
+                ser.close()
+                return fin_list
                 break
-        ser.close()
     except:
-        print([None for YY in range(7)])
-    
-    
-
-""""              
+        #return [None for YY in range(7)]
+        return p3_readsensors()
+            
+            
+"""
 #can use this to save data to a file
-#now save data
-filename = "sensordat.json"
-with open(save_path + filename, 'w') as outfile:
-    json.dump(fin_list, outfile)
-    
 
-with open(filename, 'r') as json_file:
-    test = json.load(json_file)
-print(test)
-"""""
+        #now save data
+        filename = "sensordat.json"
+        with open(filename, 'w') as outfile:
+            json.dump(fin_list, outfile)
 
+        with open(filename, 'r') as json_file:
+            test = json.load(json_file)
 
+        print(test)
+"""

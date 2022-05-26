@@ -17,7 +17,7 @@ int sensorVal;
   
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   //Serial.println("sensorread for P3 flight"); 
 
   if (!bme1.begin()) {
@@ -35,8 +35,6 @@ void setup() {
 }
 
 void loop() {
-
-    delay(1000);
     
     //read BME
     bme1.readSensor();
@@ -52,7 +50,7 @@ void loop() {
     //read thermister
     sensorVal = analogRead(sensorPin);
     //float thermV= sensorVal * (5.0 / 1023.0);   //converts analog read value to voltage
-    Serial.print(sensorVal); Serial.println();
+    Serial.print(sensorVal); Serial.print('\n');
     
 
 }

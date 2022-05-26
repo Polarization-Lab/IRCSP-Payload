@@ -23,13 +23,21 @@ def p3_readsensors(): #no inputs, but could have an input by a filename to save 
 
     try:  #this try except statement is just in case the code errors, probably isn't necessary but would avoid a crash if it happened
         while True: #recursively looks for sensor vals until it works
-            m1 = [float(item) for item in ser.readline().decode().strip().split(",")] #can throw an error if there is a strange bit in line
-            #read next two measurements to ensure valid data, output most recent correct list
-            m2 = [float(item) for item in ser.readline().decode().strip().split(",")]
-            m3 = [float(item) for item in ser.readline().decode().strip().split(",")]
+            m1=[]
+            m2=[]
+            m3=[]
+            #ensure m1-3 are valid lengths (ie make sure first index is a pressure val)
+            while len(m1) != 7:
+                m1 = [float('%.2f'%(float(item))) for item in ser.readline().decode().strip().split(",")] #can throw an error if there is a strange bit in line
+            while len(m2) != 7:
+                m2 = [float('%.2f'%(float(item))) for item in ser.readline().decode().strip().split(",")] #can throw an error if there is a strange bit in line
+            while len(m3) != 7:
+                m3 = [float('%.2f'%(float(item))) for item in ser.readline().decode().strip().split(",")] #can throw an error if there is a strange bit in line
+
             diff1 = abs(m1[0]-m2[0]) #only check most susceptible first pressure value
             diff2 = abs(m1[0]-m3[0])
             diff3 = abs(m2[0]-m3[0])
+            
             if min([diff1,diff2,diff3]) == diff1: #3rd run is least valid
                 vallist = m1
             elif min([diff1,diff2,diff3]) == diff2: #2nd run is least valid
@@ -37,31 +45,35 @@ def p3_readsensors(): #no inputs, but could have an input by a filename to save 
             else: #min[diff1,diff2,diff3] == diff1  #1st run is least valid
                 vallist = m2
 
-            if (len(vallist) == 7):  #one check for good data
-                #convert therm_V to temp
-                therm_V = float(vallist[6])
-                known_R = 10000
-                therm_R_at25C = 10000
-                therm_R = known_R/((1023/therm_V)-1)
-                #set R->temp fit params
-                if therm_R >= 32770:
-                    a,b,c,d = 3.3570420E-03,2.5214848E-04,3.3743283E-06,-6.4957311E-08
-                elif therm_R >= 3599:
-                    a,b,c,d = 3.3540170E-03, 2.5617244E-04, 2.1400943E-06, -7.2405219E-08
-                elif therm_R >= 681.6:
-                    a,b,c,d = 3.3530481E-03 , 2.5420230E-04, 1.1431163E-06, -6.9383563E-08
-                else:
-                    a,b,c,d = 3.3536166E-03, 2.5377200E-04, 8.5433271E-07, -8.7912262E-08
-                therm_temp = 1/(a+b*np.log(therm_R/therm_R_at25C)+c*np.log(therm_R/therm_R_at25C)**2+d*np.log(therm_R/therm_R_at25C)**3) #in K
-                therm_temp -= 273 #in C
-                #return list of sensor values
-                fin_list = vallist
-                fin_list[6] = round(therm_temp,3)
-                ser.close()
-                return fin_list
-                break
+            if (vallist[0] < 900):
+                print("\nWARNING",m1,m2,m3)
+                
+            #convert therm_V to temp
+            therm_V = float(vallist[6])
+            known_R = 10000
+            therm_R_at25C = 10000
+            therm_R = known_R/((1023/therm_V)-1)
+            #set R->temp fit params
+            if therm_R >= 32770:
+                a,b,c,d = 3.3570420E-03,2.5214848E-04,3.3743283E-06,-6.4957311E-08
+            elif therm_R >= 3599:
+                a,b,c,d = 3.3540170E-03, 2.5617244E-04, 2.1400943E-06, -7.2405219E-08
+            elif therm_R >= 681.6:
+                a,b,c,d = 3.3530481E-03 , 2.5420230E-04, 1.1431163E-06, -6.9383563E-08
+            else:
+                a,b,c,d = 3.3536166E-03, 2.5377200E-04, 8.5433271E-07, -8.7912262E-08
+            therm_temp = 1/(a+b*np.log(therm_R/therm_R_at25C)+c*np.log(therm_R/therm_R_at25C)**2+d*np.log(therm_R/therm_R_at25C)**3) #in K
+            therm_temp -= 273 #in C
+            
+            #return list of sensor values
+            fin_list = vallist
+            fin_list[6] = round(therm_temp,3)
+            ser.close()
+            return fin_list
+            break
     except:
         #return [None for YY in range(7)]
+        ser.close()
         return p3_readsensors()
             
             

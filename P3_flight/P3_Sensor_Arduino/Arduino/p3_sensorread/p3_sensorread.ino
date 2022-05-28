@@ -17,7 +17,7 @@ int sensorVal;
   
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   //Serial.println("sensorread for P3 flight"); 
 
   if (!bme1.begin()) {

@@ -15,11 +15,13 @@ import json #this is how we will save/read data to/from a file in Python
 def p3_readsensors(): #no inputs, but could have an input by a filename to save to or similar
     try:
         #ser = serial.Serial('/dev/tty.usbmodem141201',9600,timeout=10)
-        ser = serial.Serial('/dev/tty.usbmodem142301',9600,timeout=1,rtscts=True)
+        ser = serial.Serial('/dev/tty.usbmodem141101',9600,timeout=1,rtscts=True)  #change this port to wherever the Arduino is
 
         time.sleep(1) #to help bootloader
         
-        temp = ser.readline() #this dumps garbage data from reading before line is done writing
+        for HH in range(10): #10 is safe, 5 is probably fine
+            temp = ser.readline() #this dumps garbage data from reading before line is done writing
+            
         vallist = [float('%.2f'%(float(item))) for item in ser.readline().decode().strip().split(",")]
         
         #convert therm_V to temp

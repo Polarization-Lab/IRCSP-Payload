@@ -3,7 +3,7 @@ function that reads BME sensors and thermisters
 output: "BME1 Pressure (mbar),BME1 Humdity(%),BME1 Temp *C,BME2 Pressure (mbar),BME2 Humdity(%),BME2 Temp *C,Thermister Temp (*C)"
 to use this function, in the main Python include "from p3_readsensors import *"
 
-written by Grady Morrissey - 05/26/2022
+written by Grady Morrissey - 06/06/2022
 
 """
 
@@ -15,7 +15,7 @@ import json #this is how we will save/read data to/from a file in Python
 def p3_readsensors(): #no inputs, but could have an input by a filename to save to or similar
     try:
         #ser = serial.Serial('/dev/tty.usbmodem141201',9600,timeout=10)
-        ser = serial.Serial('/dev/tty.usbmodem141101',9600,timeout=1,rtscts=True)  #change this port to wherever the Arduino is
+        ser = serial.Serial('/dev/tty.usbmodem144201',9600,timeout=1,rtscts=True)  #change this port to wherever the Arduino is
 
         time.sleep(1) #to help bootloader
         

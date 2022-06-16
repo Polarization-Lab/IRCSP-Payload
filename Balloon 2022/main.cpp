@@ -23,7 +23,7 @@
 #include "IRCSP.h"
 
 
-enum SBCstate { boot, preflight, takeoff, shutdown } ; //SBC states
+enum SBCstate { boot, preflight, flight, shutdown } ; //SBC states
 
 //fucntions to check if cameras and BME280 have disconnected
 bool port_exists(const char* dev); //checks if dev port exists
@@ -137,14 +137,15 @@ int main(void){
                 log_status( " System Booting ", 1 ) ;
                 sleep(5);
                 inpreflight = time_up(preflight_time);
+                check_BME280();
                     
-                if(!inpreflight){   //check how much telemetry has already been written
-                    sbcState = takeoff;
+                if(ambpres > alt15pres){   //check if above or below float altitude
+                    sbcState = flight;
                     currentTime = time(NULL);
-                    log_status(" Entering TakeOff " , 1);
+                    log_status(" Entering Flight " , 1);
                 }
                 
-                else{
+                if(ambpres < alt15pres){
                     sbcState = preflight;
                     std::cout <<"preflight \n";
                     log_status( " Entering Preflight " , 1);
@@ -153,6 +154,7 @@ int main(void){
                 
             case preflight:
                 //take telemetry measrements
+                PID(20); //make function to change set temperature of PID
                 check_BME280();
                 ircsp.check_telemetry(bootTime);
                 Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
@@ -162,18 +164,19 @@ int main(void){
                 inpreflight = time_up(preflight_time);
                     
                 //SWITCH CONDITION
-                if (!inpreflight){
+                if (ambpres > alt15pres){  
                     
-                    sbcState = takeoff;
+                    sbcState = flight;
                     std::cout << "take-off \n";
-                    log_status(" Entering TakeOff " , 1);
+                    log_status(" Entering Flight " , 1);
                     log_status(" Preflight time = " + std::to_string(currentTime -bootTime ) + "s", 0);
                 }
                 break;
 
                     
-            case takeoff:
-                //take telemetry measrements
+            case flight:
+                //take telemetry measurements
+                PID(-35); //make function to change set temperature of PID
                 check_BME280();
                 ircsp.check_telemetry(bootTime);
                 Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
@@ -243,6 +246,22 @@ int take_image(){
     return status;
 }
 
+
+int PID(){
+    int status;
+    pid_t childPid;
+    if((childPid = fork()) == 0 ){
+        execlp("python3","python3","/mnt/sdcard/image_data/PID.py","PID.py",NULL);
+        perror("error");
+        log_status("imag. aq. error" ,1);
+        log_status(strerror(errno), 0);
+        exit(errno);
+    }
+    while(wait(&status) > 0);
+    return status;
+}
+
+
 void log_status(std::string message, bool wtime){
     std::fstream log;
     time_t localtime = time(NULL) ;
@@ -263,14 +282,18 @@ bool port_exists(const char* dev){ //declare USB connection check
 
 bool check_connection(){
     //define device ports that should be checked
+    // three cameras and arduino
     const char* ACM0 = "/dev/ttyACM0" ;
     const char* ACM1 = "/dev/ttyACM1" ;
     const char* ACM2 = "/dev/ttyACM2" ;
+    const char* ACM3 = "/dev/ttyACM3" ;
     
     //check for existence
     bool acm0 = port_exists(ACM0);
     bool acm1 = port_exists(ACM1);
     bool acm2 = port_exists(ACM2);
+    bool acm2 = port_exists(ACM3);
+
     
     bool existence = 1;
     

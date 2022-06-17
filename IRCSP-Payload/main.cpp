@@ -215,6 +215,7 @@ int main(void){
     return 0;
 }
 
+ //this function calls the python script which saves teh arduino readout as .txt files to be read in by main
 int check_BME280(){
     int status;
     pid_t childPid;
@@ -229,6 +230,7 @@ int check_BME280(){
     return status;
 }
 
+// this function calls the image_capture.py code as a child process, saves image as HDF5 and camera temps as .txt
 int take_image(){
     int status;
     pid_t childPid;
@@ -256,6 +258,7 @@ void log_status(std::string message, bool wtime){
     log.close();
 }
 
+// function to check that the port exists, in case of unwanted power cycle or connection loss 
 bool port_exists(const char* dev){ //declare USB connection check
     struct stat sb;
     return (stat(dev, &sb) == 0); // true if open, false otherwise

@@ -29,8 +29,8 @@ public:
     float elec_humidity;
     float elec_pressure;
     float t_ircsp;
-    float instr_humidity;
-    float instr_pressure;
+    float ircsp_humidity;
+    float ircsp_pressure;
     float dataspace;
     float voltage;
     float cam1_t;

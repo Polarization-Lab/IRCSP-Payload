@@ -23,15 +23,17 @@
 #include "IRCSP.h"
 
 
-enum SBCstate { boot, preflight, flight, shutdown } ; //SBC states
+enum SBCstate { boot, preflight, flight, shutdown } ; //SBC states 
+//include another ascension state if time permits
 
-//fucntions to check if cameras and BME280 have disconnected
+//functions to check if cameras and BME280 have disconnected
 bool port_exists(const char* dev); //checks if dev port exists
 bool check_connection(); //check for bool connection
 
 //functions which execute child python processes
 int check_BME280();
 int take_image();
+int PID();
 void log_status(std::string message, bool wtime);
 bool time_up(float hours);
 
@@ -61,12 +63,19 @@ int main(void){
     telemetry << "time"<<",";
     telemetry << "acceleration"<<",";
     telemetry << "t_sbc"<<",";
+    telemetry << "t_amb"<<",";
+    telemetry << "amb_humidity"<<",";
+    telemetry << "amb_pressure"<<",";
+    telemetry << "t_elec"<<",";
+    telemetry << "elec_humidity"<<",";
+    telemetry << "elec_pressure"<<",";
     telemetry << "t_ircsp"<<",";
-    telemetry << "humidity"<<",";
-    telemetry << "pressure"<<",";
+    telemetry << "ircsp_humidity"<<",";
+    telemetry << "ircsp_pressure"<<",";
     telemetry << "voltage"<<",";
     telemetry << "cam1_t"<<",";
-    telemetry << "cam2_t";
+    telemetry << "cam2_t"<<",";
+    telemetry << "cam3_t";
     telemetry <<"\n";
     telemetry.close();
     
@@ -85,7 +94,7 @@ int main(void){
     //set loop in automata IF connected to Boson dev ports
     bool connected = 1 ;
     
-    //BEGIN FINITE STATE MACHIENE
+    //BEGIN FINITE STATE MACHINE
     while(connected){
         //take telemetry as dictated by the ircsp.sampling
         long double timeSpent = ( time(NULL) - tStart ) ;
@@ -109,22 +118,37 @@ int main(void){
             telemetry << currentTime <<",";
             telemetry << ircsp.acceleration<<",";
             telemetry << ircsp.t_sbc   <<",";
+            telemetry << ircsp.t_amb <<",";
+            telemetry << ircsp.amb_humidity <<",";
+            telemetry << ircsp.amb_pressure <<",";
+            telemetry << ircsp.t_elec <<",";
+            telemetry << ircsp.elec_humidity <<",";
+            telemetry << ircsp.elec_pressure <<",";
             telemetry << ircsp.t_ircsp <<",";
-            telemetry << ircsp.humidity <<",";
-            telemetry << ircsp.pressure <<",";
+            telemetry << ircsp.ircsp_humidity <<",";
+            telemetry << ircsp.ircsp_pressure <<",";
             telemetry << ircsp.voltage  <<",";
             telemetry << ircsp.cam1_t  << ",";
-            telemetry << ircsp.cam2_t;
+            telemetry << ircsp.cam2_t  << ",";
+            telemetry << ircsp.cam3_t;
             telemetry <<"\n";
             telemetry.close();
             
             //print telemetry info
             std::cout << "acceleration = "<<ircsp.acceleration << "\n";
-            std::cout << "humidity = "<< ircsp.humidity<<  " % \n";
-            std::cout << "pressure = "<< ircsp.pressure<<  " hPa \n";
-            std::cout << "housing temp = "<< ircsp.t_ircsp<<  " C \n";
+            std::cout << "ambient humidity = "<< ircsp.amb_humidity<<  " % \n";
+            std::cout << "ambient pressure = "<< ircsp.amb_pressure<<  " hPa \n";
+            std::cout << "ambient temp = "<< ircsp.t_amb<<  " C \n";
+            std::cout << "electronics humidity = "<< ircsp.elec_humidity<<  " % \n";
+            std::cout << "electronics pressure = "<< ircsp.elec_pressure<<  " hPa \n";
+            std::cout << "electronics temp = "<< ircsp.t_elec<<  " C \n";
+            std::cout << "instrument housing humidity = "<< ircsp.ircsp_humidity<<  " % \n";
+            std::cout << "instrument housing pressure = "<< ircsp.ircsp_pressure<<  " hPa \n";
+            std::cout << "instrument housing temp = "<< ircsp.t_ircsp<<  " C \n";
             std::cout << "camera 1 is " << ircsp.cam1_t << " C \n";
             std::cout << "camera 2 is " <<ircsp.cam2_t << " C \n ";   
+            std::cout << "context camera is " <<ircsp.cam3_t << " C \n ";   
+
             
             //reset telemetry timer
             tStart = time(NULL);
@@ -139,13 +163,13 @@ int main(void){
                 inpreflight = time_up(preflight_time);
                 check_BME280();
                     
-                if(ambpres > alt15pres){   //check if above or below float altitude
+                if(ircsp.amb_pressure > hardcode){   //check if above or below float altitude
                     sbcState = flight;
                     currentTime = time(NULL);
                     log_status(" Entering Flight " , 1);
                 }
                 
-                if(ambpres < alt15pres){
+                if(ircsp.amb_pressure < harcode){
                     sbcState = preflight;
                     std::cout <<"preflight \n";
                     log_status( " Entering Preflight " , 1);
@@ -154,7 +178,7 @@ int main(void){
                 
             case preflight:
                 //take telemetry measrements
-                PID(20); //make function to change set temperature of PID
+                PID(20); //make function to check if PID is set to input parameter and if it isn't write it as that
                 check_BME280();
                 ircsp.check_telemetry(bootTime);
                 Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
@@ -164,7 +188,7 @@ int main(void){
                 inpreflight = time_up(preflight_time);
                     
                 //SWITCH CONDITION
-                if (ambpres > alt15pres){  
+                if (ircsp.amb_pressure > harcode){  
                     
                     sbcState = flight;
                     std::cout << "take-off \n";
@@ -222,9 +246,9 @@ int check_BME280(){
     int status;
     pid_t childPid;
     if((childPid = fork()) == 0 ){
-        execlp("python3","python3","/mnt/sdcard/image_data/read_therm.py","read_therm.py",NULL);
+        execlp("python3","python3","/mnt/sdcard/image_data/read_therm.py","readsensors.py",NULL);
         perror("error");
-        log_status("bme280 error" ,1);
+        log_status("bme280(s) error" ,1);
         log_status(strerror(errno), 0);
         exit(errno);
     }
@@ -253,7 +277,7 @@ int PID(){
     if((childPid = fork()) == 0 ){
         execlp("python3","python3","/mnt/sdcard/image_data/PID.py","PID.py",NULL);
         perror("error");
-        log_status("imag. aq. error" ,1);
+        log_status("PID error" ,1);
         log_status(strerror(errno), 0);
         exit(errno);
     }
@@ -286,7 +310,7 @@ bool check_connection(){
     const char* ACM0 = "/dev/ttyACM0" ;
     const char* ACM1 = "/dev/ttyACM1" ;
     const char* ACM2 = "/dev/ttyACM2" ;
-    const char* ACM3 = "/dev/ttyACM3" ;
+    const char* ACM3 = "/dev/ttyACM3" ; 
     
     //check for existence
     bool acm0 = port_exists(ACM0);
@@ -297,14 +321,14 @@ bool check_connection(){
     
     bool existence = 1;
     
-    if(acm0 && acm1 && acm2){
+    if(acm0 && acm1 && acm2 && acm3){
         existence = 1;
     }
-    if(!acm0 || !acm1){
+    if(!acm0 || !acm1 || !acm2){
         std::cout<< "camera(s) lost connection \n";
         existence = 0;
     }
-    if(!acm2){
+    if(!acm3){
         std::cout<< "BME280 lost connection \n" ;
         existence = 0;
     }
@@ -319,7 +343,8 @@ bool time_up(float hours){ //returns true if still in preflight
     rows++;
     std::cout << "total rows = "<< rows << "\n";
     
-    int max_rows = hours *60 /10;
+    int max_rows = hours *60 /10; 
+    #will need to change above line for a different time 
     
     
     if(rows < max_rows){

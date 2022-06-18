@@ -1,28 +1,16 @@
-'''
-Program: image_capture.py
-Author: Eduardo D Contreras
-Date: 04/20/2021
-Class: ENGR498 - Design of Payload for near-space deployment of IR Optics
-Project Sponsors: Kira Hart & Meredith Kupinski
-Mentor: Catherine Merrill
-Team Members: Nayleth Ramirez, Jeremy Parkinson, Jaclyn John, Thor Niel, Wassim Khawam
-Description: The program is designed to automate image capturing using the FLIR Boson
-cameras in the IRCSP. The program will continuously perform image acquisition with FPA
-temperatures and store them with the Operating System Timestamp at time of creation in
-order to create a tracking system for each file created during the flight mission.
-'''
+
 
 import os, datetime, time, h5py
-#from flirpy.camera.boson import Boson
+from flirpy.camera.boson import Boson
 
 
 def take_image(filename):
     """take_image: The function will create a Operating System timestamp variable (OS_time), configure
-                the 2 IRCSP cameras to take an image (image1 & image2) and store the FPA temperatures
-                (temp1 & temp2) into an HDF5 File format with a unique naming convention.
+                the 2 IRCSP cameras and context camera to take three images (image1, image2, image3) and store the FPA temperatures
+                (temp1,temp2,temp3) into an HDF5 File format with a unique naming convention.
     Parameters:
                 filename - the filename of the HDF5 file.
-    Returns: HDF5 file with 2 FLIR Boson Images, 2 FPA Temperatures & OS_time string.
+    Returns: HDF5 file with 3 FLIR Boson Images, 3 FPA Temperatures & OS_time string.
     """
 
     # Time/Speed Test - Start
@@ -33,28 +21,35 @@ def take_image(filename):
         now = datetime.datetime.now()
         OS_time = now.strftime("%H:%M:%S")
 
-        camera1 = Boson(port='/dev/ttyACM0')
+        camera1 = Boson(port='/dev/ttyACM0') #find which one is transmission and which one is reflection
         camera2 = Boson(port='/dev/ttyACM1')
+        camera3 = Boson(port= 'dev/ttyACM2')
 
         #set FFC to manual
         camera1.set_ffc_manual()
         camera2.set_ffc_manual()
+        camera3.set_ffc_auto() #why auto not manual, check auto function of flirpy
 
         #get FPA temperature
         temp1 = camera1.get_fpa_temperature()
         temp2 = camera2.get_fpa_temperature()
+        temp3 = camera3.get_fpa_temperature()
         print(temp1)
         print(temp2)
+        print(temp3)
 
         #Take Image
         image1 = camera1.grab(device_id = 0)
         image2 = camera2.grab(device_id = 1)
+        image3 = camera2.grab(device_id = 2) #check this
+
 
     except:
         print('error in image aquisition')
         #Close Camera
         camera1.close()
         camera2.close()
+        camera3.close()
         time.sleep(5)
     
     finally:
@@ -63,13 +58,15 @@ def take_image(filename):
             h5.attrs["OS_time"] = OS_time
             h5["image1"] = image1
             h5["image2"] = image2
+            h5["image3"] = image3
             h5["temp1"] = temp1
             h5["temp2"] = temp2
-
+            h5["temp3"] = temp3
 
         #Close Camera
         camera1.close()
         camera2.close()
+        camera3.close()
 
 
         #Time/Speed Test - Finish

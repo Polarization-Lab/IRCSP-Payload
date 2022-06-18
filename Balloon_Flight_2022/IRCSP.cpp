@@ -29,18 +29,20 @@ void IRCSP::check_telemetry (time_t bootTime)
     dataspace = GetStdoutFromCommand("du -k " + dataPath);
     
     //camera temperatures from .txt file
-    std::fstream myfile1("/mnt/sdcard/image_data/temp1.txt", std::ios_base::in);
+    std::fstream myfile1("/mnt/sdcard/image_data/FPAtemp1.txt", std::ios_base::in);
     myfile1 >> cam1_t;
-    std::fstream myfile2("/mnt/sdcard/image_data/temp2.txt", std::ios_base::in);
+    std::fstream myfile2("/mnt/sdcard/image_data/FPAtemp2.txt", std::ios_base::in);
     myfile2 >> cam2_t;
+    std::fstream myfile3("/mnt/sdcard/image_data/FPAtemp3.txt", std::ios_base::in);
+    myfile2 >> cam3_t;
     
     //BME280 readings from .txt file
-    std::fstream myfile3("/mnt/sdcard/image_data/hum.txt", std::ios_base::in);
-    myfile3 >> humidity;
+    std::fstream myfile3("/mnt/sdcard/image_data/amb_hum.txt", std::ios_base::in);
+    myfile3 >> amb_humidity;
     std::fstream myfile4("/mnt/sdcard/image_data/temp.txt", std::ios_base::in);
     myfile4 >> t_ircsp;
     std::fstream myfile5("/mnt/sdcard/image_data/pres.txt", std::ios_base::in);
-    myfile5 >> pressure;
+    myfile5 >> amb_pressure;
     
 }
 

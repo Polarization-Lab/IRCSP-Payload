@@ -23,12 +23,17 @@ public:
     float acceleration;
     float t_sbc;
     float t_ircsp;
-    float humidity;
-    float pressure;
+    float amb_humidity;
+    float amb_pressure;
+    float elec_humidity;
+    float elec_pressure;
+    float instr_humidity;
+    float instr_pressure;
     float dataspace;
     float voltage;
     float cam1_t;
     float cam2_t;
+    float cam3_t;
     
     
     //State switching parameters
@@ -41,7 +46,7 @@ public:
     int wait_time  = .1;
     int MAX_TIME = 10000; //in seconds
 
-    int   sampling = 10; //interval to take telemetry
+    int sampling = 10; //interval to take telemetry
     
     //filepaths
     std::string logPath = "/mnt/sdcard/image_data/log.txt";

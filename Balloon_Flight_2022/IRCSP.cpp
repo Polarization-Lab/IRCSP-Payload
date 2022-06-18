@@ -34,15 +34,27 @@ void IRCSP::check_telemetry (time_t bootTime)
     std::fstream myfile2("/mnt/sdcard/image_data/FPAtemp2.txt", std::ios_base::in);
     myfile2 >> cam2_t;
     std::fstream myfile3("/mnt/sdcard/image_data/FPAtemp3.txt", std::ios_base::in);
-    myfile2 >> cam3_t;
+    myfile3 >> cam3_t;
     
     //BME280 readings from .txt file
-    std::fstream myfile3("/mnt/sdcard/image_data/amb_hum.txt", std::ios_base::in);
-    myfile3 >> amb_humidity;
-    std::fstream myfile4("/mnt/sdcard/image_data/temp.txt", std::ios_base::in);
-    myfile4 >> t_ircsp;
-    std::fstream myfile5("/mnt/sdcard/image_data/pres.txt", std::ios_base::in);
-    myfile5 >> amb_pressure;
+    std::fstream myfile4("/mnt/sdcard/image_data/amb_hum.txt", std::ios_base::in);
+    myfile4 >> amb_humidity;
+    std::fstream myfile5("/mnt/sdcard/image_data/amb_temp.txt", std::ios_base::in);
+    myfile5 >> t_amb;
+    std::fstream myfile6("/mnt/sdcard/image_data/amb_pres.txt", std::ios_base::in);
+    myfile6 >> amb_pressure;
+    std::fstream myfile7("/mnt/sdcard/image_data/elec_hum.txt", std::ios_base::in);
+    myfile7 >> elec_humidity;
+    std::fstream myfile8("/mnt/sdcard/image_data/elec_temp.txt", std::ios_base::in);
+    myfile8>> t_elec;
+    std::fstream myfile9("/mnt/sdcard/image_data/elec_pres.txt", std::ios_base::in);
+    myfile9 >> elec_pressure;
+    std::fstream myfile10("/mnt/sdcard/image_data/ircsp_hum.txt", std::ios_base::in);
+    myfile10 >> ircsp_humidity;
+    std::fstream myfile11("/mnt/sdcard/image_data/ircsp_temp.txt", std::ios_base::in);
+    myfile11 >> t_ircsp;
+    std::fstream myfile12("/mnt/sdcard/image_data/ircsp_pres.txt", std::ios_base::in);
+    myfile12 >> ircsp_pressure;
     
 }
 

@@ -22,11 +22,13 @@ public:
     float time_elapsed;
     float acceleration;
     float t_sbc;
-    float t_ircsp;
+    float t_amb;
     float amb_humidity;
     float amb_pressure;
+    float t_elc;
     float elec_humidity;
     float elec_pressure;
+    float t_ircsp;
     float instr_humidity;
     float instr_pressure;
     float dataspace;

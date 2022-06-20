@@ -14,7 +14,7 @@ import time
 import serial
 import numpy as np
 
-def balloon2022_readsensors(): #no inputs, but could have an input by a filename to save to or similar
+def readsensors(): #no inputs, but could have an input by a filename to save to or similar
     try:
         port_name = '/dev/ttyACM2'
         #port_name = '/dev/tty.usbmodem141101'

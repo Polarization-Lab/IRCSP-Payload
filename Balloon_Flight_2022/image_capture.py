@@ -23,7 +23,7 @@ def take_image(filename):
 
         camera1 = Boson(port='/dev/ttyACM0') #find which one is transmission and which one is reflection
         camera2 = Boson(port='/dev/ttyACM1')
-        camera3 = Boson(port= 'dev/ttyACM2')
+        camera3 = Boson(port= '/dev/ttyACM2')
 
         #set FFC to manual
         camera1.set_ffc_manual()
@@ -41,7 +41,7 @@ def take_image(filename):
         #Take Image
         image1 = camera1.grab(device_id = 0)
         image2 = camera2.grab(device_id = 1)
-        image3 = camera2.grab(device_id = 2) #check this
+        image3 = camera3.grab(device_id = 2) #check this
 
 
     except:

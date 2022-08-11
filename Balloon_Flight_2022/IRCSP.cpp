@@ -3,6 +3,7 @@
 //  IRCSP-Payload
 //
 //  Created by Kira Hart on 8/5/21.
+//  Edited by Jaclyn John on 6/20/22
 //
 
 #include "IRCSP.h"
@@ -11,7 +12,6 @@
 #include <fstream>
 
 //#include "Accelerometer.h"
-
 IRCSP::IRCSP()
 {
 
@@ -30,31 +30,41 @@ void IRCSP::check_telemetry (time_t bootTime)
     
     //camera temperatures from .txt file
     std::fstream myfile1("/mnt/sdcard/image_data/FPAtemp1.txt", std::ios_base::in);
-    myfile1 >> cam1_t;
+    myfile1 >> t_cam1;
     std::fstream myfile2("/mnt/sdcard/image_data/FPAtemp2.txt", std::ios_base::in);
-    myfile2 >> cam2_t;
+    myfile2 >> t_cam2;
     std::fstream myfile3("/mnt/sdcard/image_data/FPAtemp3.txt", std::ios_base::in);
-    myfile3 >> cam3_t;
+    myfile3 >> t_cam3;
     
     //BME280 readings from .txt file
-    std::fstream myfile4("/mnt/sdcard/image_data/amb_hum.txt", std::ios_base::in);
-    myfile4 >> amb_humidity;
-    std::fstream myfile5("/mnt/sdcard/image_data/amb_temp.txt", std::ios_base::in);
-    myfile5 >> t_amb;
-    std::fstream myfile6("/mnt/sdcard/image_data/amb_pres.txt", std::ios_base::in);
-    myfile6 >> amb_pressure;
-    std::fstream myfile7("/mnt/sdcard/image_data/elec_hum.txt", std::ios_base::in);
-    myfile7 >> elec_humidity;
-    std::fstream myfile8("/mnt/sdcard/image_data/elec_temp.txt", std::ios_base::in);
-    myfile8>> t_elec;
-    std::fstream myfile9("/mnt/sdcard/image_data/elec_pres.txt", std::ios_base::in);
-    myfile9 >> elec_pressure;
-    std::fstream myfile10("/mnt/sdcard/image_data/ircsp_hum.txt", std::ios_base::in);
-    myfile10 >> ircsp_humidity;
-    std::fstream myfile11("/mnt/sdcard/image_data/ircsp_temp.txt", std::ios_base::in);
-    myfile11 >> t_ircsp;
-    std::fstream myfile12("/mnt/sdcard/image_data/ircsp_pres.txt", std::ios_base::in);
-    myfile12 >> ircsp_pressure;
+    std::fstream myfile4("/mnt/sdcard/image_data/hum1.txt", std::ios_base::in);
+    myfile4 >> ircsp_humidity;
+    std::fstream myfile5("/mnt/sdcard/image_data/temp1.txt", std::ios_base::in);
+    myfile5 >> t_ircsp;
+    std::fstream myfile6("/mnt/sdcard/image_data/press1.txt", std::ios_base::in);
+    myfile6 >> ircsp_pressure;
+    std::fstream myfile7("/mnt/sdcard/image_data/hum2.txt", std::ios_base::in);
+    myfile7 >> amb_humidity;
+    std::fstream myfile8("/mnt/sdcard/image_data/temp2.txt", std::ios_base::in);
+    myfile8>> t_amb;
+    std::fstream myfile9("/mnt/sdcard/image_data/press2.txt", std::ios_base::in);
+    myfile9 >> amb_pressure;
+    std::fstream myfile10("/mnt/sdcard/image_data/hum3.txt", std::ios_base::in);
+    myfile10 >> elec_humidity;
+    std::fstream myfile11("/mnt/sdcard/image_data/temp3.txt", std::ios_base::in);
+    myfile11 >> t_elec;
+    std::fstream myfile12("/mnt/sdcard/image_data/press3.txt", std::ios_base::in);
+    myfile12 >> elec_pressure;
+    std::fstream myfile13("/mnt/sdcard/image_data/thermVal.txt", std::ios_base::in);
+    myfile13 >> thermVal;
+    std::fstream myfile14("/mnt/sdcard/image_data/contextVal.txt", std::ios_base::in);
+    myfile14 >> contextVal;
+    std::fstream myfile15("/mnt/sdcard/image_data/lensVal.txt", std::ios_base::in);
+    myfile15 >> lensVal;
+    std::fstream myfile15("/mnt/sdcard/image_data/thermtemp1.txt", std::ios_base::in);
+    myfile15 >> therm_temp;
+    std::fstream myfile15("/mnt/sdcard/image_data/context_temp.txt", std::ios_base::in);
+    myfile15 >> context_temp;
     
 }
 

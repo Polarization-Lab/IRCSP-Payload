@@ -4,7 +4,7 @@ import numpy as np
 
 def readsensors(): #no inputs, but could have an input by a filename to save to or similar
     try:
-        port_name = 'COM25'
+        port_name = '/dev/ttyACM3'
         #port_name = '/dev/tty.usbmodem141101'
         ser = serial.Serial(port_name,9600,timeout=1,rtscts=True)  #change this port to wherever the Arduino is
         time.sleep(1) #to help bootloader
@@ -15,11 +15,10 @@ def readsensors(): #no inputs, but could have an input by a filename to save to 
         vallist = [float('%.2f'%(float(item))) for item in ser.readline().decode().strip().split(",")]
         #convert therm_V to temp
         therm_V = float(vallist[9])
-        print(therm_V)
         context_V = float(vallist[10])
        # lens_V = float(vallist[11])
         known_R = 10000 #housing and context camera thermistor
-      #  lens_known_R = 51000    
+      #  lens_known_R = 51000
         therm_R_at25C = 10000
         therm_R = known_R/((1023/therm_V)-1)
         context_R = known_R/((1023/context_V)-1)
@@ -43,7 +42,7 @@ def readsensors(): #no inputs, but could have an input by a filename to save to 
       #  lens_B = 3455
         
         context_temp = (context_B*25)/(context_B + (25*np.log(context_R/10000)))
-      #  lens_temp = (lens_B*25)/(lens_B + (25*np.log(lens_R/10000)))        
+      #  lens_temp = (lens_B*25)/(lens_B + (25*np.log(lens_R/10000)))
         
         
         #return list of sensor values
@@ -54,14 +53,14 @@ def readsensors(): #no inputs, but could have an input by a filename to save to 
         fin_list[3] = round((fin_list[3]*.01),6)
         fin_list[6] = round((fin_list[6]*.01),6)
         ser.close()
-        
+    
         #write to txt files
-        #filenames = ["press1","hum1","temp1","press2","hum2","temp2","press3","hum3","temp3","thermtemp1"]
-        #dir_name = "/mnt/sdcard/image_data/"
-        #for NN in range(len(fin_list)):
-         #   f = open(dir_name+filenames[NN]+".txt","w+")
-          #  f.write(str(fin_list[NN]))
-           # f.close()
+        filenames = ["press1","hum1","temp1","press2","hum2","temp2","press3","hum3","temp3","thermVal","contextVal","lensVal","thermtemp1","context_temp"]
+        dir_name = "/mnt/sdcard/image_data/"
+        for NN in range(len(fin_list)):
+            f = open(dir_name+filenames[NN]+".txt","w+")
+            f.write(str(fin_list[NN]))
+            f.close()
             
         return fin_list
         print(fin_list)
@@ -70,4 +69,4 @@ def readsensors(): #no inputs, but could have an input by a filename to save to 
 
 
 
-
+readsensors()

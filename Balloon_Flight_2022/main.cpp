@@ -21,9 +21,9 @@
 #include "ADC.h"
 #include "Accelerometer.h"
 #include "IRCSP.h"
+#include "IRCSP.cpp"
 
-
-enum SBCstate { boot, preflight, flight, shutdown } ; //SBC states 
+enum SBCstate { boot, preflight, takeoff, flight, shutdown } ; //SBC states
 //include another ascension state if time permits
 
 //functions to check if cameras and BME280 have disconnected
@@ -33,15 +33,16 @@ bool check_connection(); //check for bool connection
 //functions which execute child python processes
 int check_BME280();
 int take_image();
-int PID();
+int TEC_set_roomtemp();
+int TEC_set_flight_temp();
 void log_status(std::string message, bool wtime);
 bool time_up(float hours);
 
 int main(void){
     
-    //check time in fligth
+    //check time in flight
     bool inpreflight = 1;
-    float preflight_time = 3; //time in preflight state
+    float preflight_time = 5; //hours in preflight state
     
     time_t bootTime = time(NULL);// stores epoch time;
     time_t currentTime;
@@ -60,7 +61,7 @@ int main(void){
     //make header for telemetry file
     std::fstream telemetry;
     telemetry.open(ircsp.telemetryPath,std::fstream::app);
-    telemetry << "time"<<",";
+    telemetry << "time_elapsed"<<",";
     telemetry << "acceleration"<<",";
     telemetry << "t_sbc"<<",";
     telemetry << "t_amb"<<",";
@@ -73,9 +74,12 @@ int main(void){
     telemetry << "ircsp_humidity"<<",";
     telemetry << "ircsp_pressure"<<",";
     telemetry << "voltage"<<",";
-    telemetry << "cam1_t"<<",";
-    telemetry << "cam2_t"<<",";
-    telemetry << "cam3_t";
+    telemetry << "t_cam1"<<",";
+    telemetry << "t_cam2"<<",";
+    telemetry << "therm_temp"<<",";
+    telemetry << "contextVal"<<",";
+    telemetry << "lensVal"<<",";
+    telemetry << "t_cam3";
     telemetry <<"\n";
     telemetry.close();
     
@@ -117,7 +121,7 @@ int main(void){
             telemetry.open(ircsp.telemetryPath, std::fstream::app);
             telemetry << currentTime <<",";
             telemetry << ircsp.acceleration<<",";
-            telemetry << ircsp.t_sbc   <<",";
+            telemetry << ircsp.t_sbc<<",";
             telemetry << ircsp.t_amb <<",";
             telemetry << ircsp.amb_humidity <<",";
             telemetry << ircsp.amb_pressure <<",";
@@ -128,27 +132,37 @@ int main(void){
             telemetry << ircsp.ircsp_humidity <<",";
             telemetry << ircsp.ircsp_pressure <<",";
             telemetry << ircsp.voltage  <<",";
-            telemetry << ircsp.cam1_t  << ",";
-            telemetry << ircsp.cam2_t  << ",";
-            telemetry << ircsp.cam3_t;
+            telemetry << ircsp.t_cam1  << ",";
+            telemetry << ircsp.t_cam2  << ",";
+            telemetry << ircsp.thermVal  << ",";
+            telemetry << ircsp.contextVal << ",";
+            telemetry << ircsp.lensVal << ",";
+            telemetry << ircsp.therm_temp << ",";
+            telemetry << ircsp.context_temp << ",";
+            telemetry << ircsp.t_cam3;
             telemetry <<"\n";
             telemetry.close();
             
             //print telemetry info
             std::cout << "acceleration = "<<ircsp.acceleration << "\n";
             std::cout << "ambient humidity = "<< ircsp.amb_humidity<<  " % \n";
-            std::cout << "ambient pressure = "<< ircsp.amb_pressure<<  " hPa \n";
+            std::cout << "ambient pressure = "<< ircsp.amb_pressure<<  " mbar \n";
             std::cout << "ambient temp = "<< ircsp.t_amb<<  " C \n";
             std::cout << "electronics humidity = "<< ircsp.elec_humidity<<  " % \n";
-            std::cout << "electronics pressure = "<< ircsp.elec_pressure<<  " hPa \n";
+            std::cout << "electronics pressure = "<< ircsp.elec_pressure<<  " mbar \n";
             std::cout << "electronics temp = "<< ircsp.t_elec<<  " C \n";
             std::cout << "instrument housing humidity = "<< ircsp.ircsp_humidity<<  " % \n";
-            std::cout << "instrument housing pressure = "<< ircsp.ircsp_pressure<<  " hPa \n";
+            std::cout << "instrument housing pressure = "<< ircsp.ircsp_pressure<<  " mbar \n";
+            std::cout << "thermistor temp = " << ircsp.therm_temp << "C \n";
             std::cout << "instrument housing temp = "<< ircsp.t_ircsp<<  " C \n";
-            std::cout << "camera 1 is " << ircsp.cam1_t << " C \n";
-            std::cout << "camera 2 is " <<ircsp.cam2_t << " C \n ";   
-            std::cout << "context camera is " <<ircsp.cam3_t << " C \n ";   
-
+            std::cout << "camera 1 is " << ircsp.t_cam1 << " C \n";
+            std::cout << "camera 2 is " <<ircsp.t_cam2 << " C \n ";
+            std::cout << "context camera is " <<ircsp.t_cam3 << " C \n ";
+            std::cout << "context camera thermistor is " <<ircsp.context_temp << " C \n ";
+            std::cout << "housing thermistor is " <<ircsp.therm_temp << " C \n ";
+            std::cout << "housing thermistor analog value is " <<ircsp.thermVal << " C \n ";
+            std::cout << "lens analog value is " <<ircsp.lensVal << " C \n ";
+            std::cout << "context camera analog value is " <<ircsp.contextVal << " C \n ";
             
             //reset telemetry timer
             tStart = time(NULL);
@@ -160,25 +174,15 @@ int main(void){
                 std::cout << " System Booting \n"  ;
                 log_status( " System Booting ", 1 ) ;
                 sleep(5);
-                inpreflight = time_up(preflight_time);
-                check_BME280();
-                    
-                if(ircsp.amb_pressure > hardcode){   //check if above or below float altitude
-                    sbcState = flight;
-                    currentTime = time(NULL);
-                    log_status(" Entering Flight " , 1);
-                }
-                
-                if(ircsp.amb_pressure < harcode){
-                    sbcState = preflight;
-                    std::cout <<"preflight \n";
-                    log_status( " Entering Preflight " , 1);
-                }
+                sbcState = preflight;
+                std::cout <<"Entering Preflight \n";
+                log_status( " Entering Preflight " , 1);
+   
                 break;
                 
             case preflight:
-                //take telemetry measrements
-                PID(20); //make function to check if PID is set to input parameter and if it isn't write it as that
+
+                TEC_set_roomtemp()();
                 check_BME280();
                 ircsp.check_telemetry(bootTime);
                 Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
@@ -188,19 +192,52 @@ int main(void){
                 inpreflight = time_up(preflight_time);
                     
                 //SWITCH CONDITION
-                if (ircsp.amb_pressure > harcode){  
+                if (ircsp.amb_pressure < 122){
                     
                     sbcState = flight;
-                    std::cout << "take-off \n";
+                    std::cout << "Entering Flight \n";
                     log_status(" Entering Flight " , 1);
                     log_status(" Preflight time = " + std::to_string(currentTime -bootTime ) + "s", 0);
+                }
+                
+                if (!inpreflight){
+                    sbcState = takeoff;
+                    std::cout << "Entering Takeoff \n";
+                    log_status(" Entering Takeoff " , 1);
+                    log_status(" Preflight time = " + std::to_string(currentTime -bootTime ) + "s", 0);
+                }
+                break;
+                
+            case takeoff:
+                
+                TEC_set_roomtemp()();
+                check_BME280();
+                ircsp.check_telemetry(bootTime);
+                currentTime = time(NULL);
+                
+                take_image();
+                
+                
+                if (ircsp.amb_pressure < 122){
+                    
+                    sbcState = flight;
+                    std::cout << "Entering Flight \n";
+                    log_status(" Entering Flight " , 1);
+                    log_status(" Preflight time = " + std::to_string(currentTime -bootTime ) + "s", 0);
+                }
+                
+                if (ircsp.dataspace > ircsp.MAX_DATA){
+                    sbcState = shutdown;
+                    log_status(" Data Max Reached, Shutting Down " , 1 );
+                    log_status(" Acceleration = " + std::to_string( ircsp.acceleration ) + "G", 0);
+                    log_status(" flight time = " + std::to_string(currentTime -bootTime) + "s", 0);
                 }
                 break;
 
                     
             case flight:
-                //take telemetry measurements
-                PID(-35); //make function to change set temperature of PID
+                
+                TEC_set_flight_temp()();
                 check_BME280();
                 ircsp.check_telemetry(bootTime);
                 Accelerometer::accelerometer_read(accel->twifd, &settings[0], 0x15, 4);
@@ -246,7 +283,7 @@ int check_BME280(){
     int status;
     pid_t childPid;
     if((childPid = fork()) == 0 ){
-        execlp("python3","python3","/mnt/sdcard/image_data/read_therm.py","readsensors.py",NULL);
+        execlp("python3","python3","/mnt/sdcard/image_data/readsensors.py","readsensors.py",NULL);
         perror("error");
         log_status("bme280(s) error" ,1);
         log_status(strerror(errno), 0);
@@ -271,11 +308,11 @@ int take_image(){
 }
 
 
-int PID(){
+int TEC_set_flight_temp(){
     int status;
     pid_t childPid;
     if((childPid = fork()) == 0 ){
-        execlp("python3","python3","/mnt/sdcard/image_data/PID.py","PID.py",NULL);
+        execlp("python3","python3","/mnt/sdcard/image_data/TEC_set_flight_temp.py","TEC_set_flight_temp.py",NULL);
         perror("error");
         log_status("PID error" ,1);
         log_status(strerror(errno), 0);
@@ -285,6 +322,19 @@ int PID(){
     return status;
 }
 
+int TEC_set_roomtemp(){
+    int status;
+    pid_t childPid;
+    if((childPid = fork()) == 0 ){
+        execlp("python3","python3","/mnt/sdcard/image_data/TEC_set_roomtemp.py","TEC_set_roomtemp.py",NULL);
+        perror("error");
+        log_status("error changing TEC temp to room temperature" ,1);
+        log_status(strerror(errno), 0);
+        exit(errno);
+    }
+    while(wait(&status) > 0);
+    return status;
+}
 
 void log_status(std::string message, bool wtime){
     std::fstream log;
@@ -306,22 +356,23 @@ bool port_exists(const char* dev){ //declare USB connection check
 
 bool check_connection(){
     //define device ports that should be checked
-    // three cameras and arduino
+    // three cameras and arduino and TEC controller
     const char* ACM0 = "/dev/ttyACM0" ;
     const char* ACM1 = "/dev/ttyACM1" ;
     const char* ACM2 = "/dev/ttyACM2" ;
-    const char* ACM3 = "/dev/ttyACM3" ; 
+    const char* ACM3 = "/dev/ttyACM3" ;
+
     
     //check for existence
     bool acm0 = port_exists(ACM0);
     bool acm1 = port_exists(ACM1);
     bool acm2 = port_exists(ACM2);
-    bool acm2 = port_exists(ACM3);
+    bool acm3 = port_exists(ACM3);
 
     
     bool existence = 1;
     
-    if(acm0 && acm1 && acm2 && acm3){
+    if(acm0) && acm1 && acm2 && acm3){
         existence = 1;
     }
     if(!acm0 || !acm1 || !acm2){
@@ -332,6 +383,7 @@ bool check_connection(){
         std::cout<< "BME280 lost connection \n" ;
         existence = 0;
     }
+}
     return existence;
 }
 
@@ -343,8 +395,8 @@ bool time_up(float hours){ //returns true if still in preflight
     rows++;
     std::cout << "total rows = "<< rows << "\n";
     
-    int max_rows = hours *60 /10; 
-    #will need to change above line for a different time 
+  int max_rows = hours *360 /10; //fix this
+        //choose time for how long to be in preflight before just going into flight
     
     
     if(rows < max_rows){
@@ -354,3 +406,4 @@ bool time_up(float hours){ //returns true if still in preflight
         return 0;
     }
 }
+

@@ -7,8 +7,10 @@
 
 #pragma once
 #include "IRCSPState.h"
+#include "ConcreteIRCSPStates.h"
 
-#include<string>
+
+#include <string>
 #include <stdio.h>
 #include <time.h>
 
@@ -21,11 +23,11 @@ public:
     //telemetry attributes
     float time_elapsed;
     float acceleration;
-    float t_sbc;
     float t_amb;
+    float t_sbc;
     float amb_humidity;
     float amb_pressure;
-    float t_elc;
+    float t_elec;
     float elec_humidity;
     float elec_pressure;
     float t_ircsp;
@@ -33,9 +35,14 @@ public:
     float ircsp_pressure;
     float dataspace;
     float voltage;
-    float cam1_t;
-    float cam2_t;
-    float cam3_t;
+    float t_cam1;
+    float t_cam2;
+    float t_cam3;
+    float thermVal;
+    float contextVal;
+    float lensVal;
+    float therm_temp;
+    float context_temp;
     
     
     //State switching parameters
@@ -62,7 +69,7 @@ public:
     IRCSP();
     inline IRCSPState* getCurrentState() const { return currentState; };
     void toggle();
-    void setState(IRCSPState& newState);
+    void setState(IRCSPState & newState);
     int GetStdoutFromCommand(std::string);
     
 private:

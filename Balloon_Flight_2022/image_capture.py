@@ -1,5 +1,3 @@
-
-
 import os, datetime, time, h5py
 from flirpy.camera.boson import Boson
 
@@ -21,14 +19,14 @@ def take_image(filename):
         now = datetime.datetime.now()
         OS_time = now.strftime("%H:%M:%S")
 
-        camera1 = Boson(port='/dev/ttyACM0') #find which one is transmission and which one is reflection
+        camera1 = Boson(port='/dev/ttyACM0') #transmission or reflection
         camera2 = Boson(port='/dev/ttyACM1')
-        camera3 = Boson(port= '/dev/ttyACM2')
+        camera3 = Boson(port='/dev/ttyACM2')
 
         #set FFC to manual
         camera1.set_ffc_manual()
         camera2.set_ffc_manual()
-        camera3.set_ffc_auto() #why auto not manual, check auto function of flirpy
+        camera3.set_ffc_manual() #why auto not manual, check auto function of flirpy
 
         #get FPA temperature
         temp1 = camera1.get_fpa_temperature()
@@ -52,7 +50,7 @@ def take_image(filename):
         camera3.close()
         time.sleep(5)
     
-    finally:
+    try:
         # Open as Read-Write ("a" - creates file if doesn't exist)
         with h5py.File(filename, "a") as h5:
             h5.attrs["OS_time"] = OS_time
@@ -62,11 +60,22 @@ def take_image(filename):
             h5["temp1"] = temp1
             h5["temp2"] = temp2
             h5["temp3"] = temp3
-
+            
+        temps = [temp1,temp2,temp3]
+        filenames = ["FPAtemp1","FPAtemp2", "FPAtemp3"]
+        for NN in range(len(temps)):
+            f = open('/mnt/sdcard/image_data/'+ filenames[NN] +".txt","w+")
+            f.write(str(temps[NN]))
+            f.close()
+    except:
+        print('error in saving image data')
+    finally:
+        
         #Close Camera
         camera1.close()
         camera2.close()
         camera3.close()
+        exit()
 
 
         #Time/Speed Test - Finish
@@ -75,6 +84,7 @@ def take_image(filename):
 
         #Adjust Sleep for File Creation Rate - (File/Seconds)
         time.sleep(10)
+
 
 #==========================================================
 def main():
@@ -94,6 +104,7 @@ def main():
     #Check Destination Directory (path)
     path = '/mnt/sdcard/image_data/'
     directory = os.listdir(path)
+
     
     print()
     print("Directory Path %r : \n" % (path))

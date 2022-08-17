@@ -45,17 +45,17 @@ void setup()
     Serial.begin(9600);
 
     /* Initialise sensors */
-    tcaselect(2);
+    tcaselect(1);
     if(!bme1.begin())
     {
-      Serial.println("No BME280 detected at Multiplexer Port 2!");
+      Serial.println("No BME280 detected at Multiplexer Port 1!");
       while(1);
     }
     
-    tcaselect(4);
+    tcaselect(2);
     if(!bme2.begin())
     {
-      Serial.println("No BME280 detected at Multiplexer Port 4!");
+      Serial.println("No BME280 detected at Multiplexer Port 2!");
       while(1);
     }
 

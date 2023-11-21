@@ -52,25 +52,25 @@ void setup()
     Serial.begin(9600);
 
     /* Initialise sensors */
-      tcaselect(4);
+      tcaselect(1);
       if(!bme1.begin())
     {
-      Serial.println("No BME280 detected at Multiplexer Port 1!");
-      while(1);
+      //Serial.println("No BME280 detected at Multiplexer Port 1!");
+      //while(1);
     }
     
     tcaselect(2);
     if(!bme2.begin())
     {
-      Serial.println("No BME280 detected at Multiplexer Port 2!");
-      while(1);
+      //Serial.println("No BME280 detected at Multiplexer Port 2!");
+      //while(1);
     }
 
     tcaselect(6);
     if(!bme3.begin())
     {
-      Serial.println("No BME280 detected at Multiplexer Port 6!");
-     while(1);
+      //Serial.println("No BME280 detected at Multiplexer Port 6!");
+     //while(1);
    }
 
 }
@@ -79,18 +79,18 @@ void loop()
 {
   
     //read BMEs
-    tcaselect(4);
-    Serial.print("bme 1 ");
+    tcaselect(1);
+   // Serial.print("bme 1 ");
     Serial.print(bme1.readPressure()); Serial.print(",");
     Serial.print(bme1.readHumidity()); Serial.print(",");  //%
     Serial.print(bme1.readTemperature()); Serial.print(",");   //°C
     tcaselect(2);
-    Serial.print("bme 2 ");
+   // Serial.print("bme 2 ");
     Serial.print(bme2.readPressure()); Serial.print(",");
     Serial.print(bme2.readHumidity()); Serial.print(",");
     Serial.print(bme2.readTemperature()); Serial.print(",");
     tcaselect(6);
-    Serial.print("bme 3 ");
+   // Serial.print("bme 3 ");
     Serial.print(bme3.readPressure()); Serial.print(",");
     Serial.print(bme3.readHumidity()); Serial.print(",");
     Serial.print(bme3.readTemperature()); Serial.print(",");
@@ -103,6 +103,7 @@ void loop()
     //float thermV= sensorVal * (5.0 / 1023.0);   //converts analog read value to voltage
     Serial.print(contextVal); Serial.print(',');
     Serial.print(lensVal); Serial.print(',');
-    Serial.print(sensorVal); 
+    Serial.print(sensorVal); Serial.print(',');
+    Serial.print(heatVal); 
     Serial.print('\n');
 }
